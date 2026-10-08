@@ -43,7 +43,10 @@
     
     <div id="web-input">
         <input type="file" id="folder-input" webkitdirectory directory style="display:none">
+        <input type="file" id="files-input" multiple accept=".json,.json.txt,.skel,.skel.bytes,.atlas,.atlas.txt,.png,.jpg,.jpeg,.webp" style="display:none">
         <button class="btn-folder" onclick="document.getElementById('folder-input').click()">📂 打开动画文件夹</button>
+        <button class="btn-folder secondary" onclick="document.getElementById('files-input').click()">＋ 添加单个动画</button>
+        <p class="load-hint">再次打开文件夹会追加到左侧列表，不会清掉已经加载的骨架。同一套文件不会重复加入。</p>
     </div>
     <div id="native-input" style="display:none;">
         <button class="btn-folder" onclick="openNativeFolder()">📂 打开本地文件夹</button>
@@ -134,10 +137,14 @@
     </div>
     
     <div id="file-panel" class="panel">
-        <button onclick="location.reload()" class="btn-large">🔄 重置 / 打开新文件</button>
+        <div class="load-actions">
+            <button type="button" onclick="document.getElementById('folder-input').click()">📂 追加文件夹</button>
+            <button type="button" onclick="document.getElementById('files-input').click()">＋ 添加单个</button>
+            <button type="button" onclick="clearSpineList()">清空列表</button>
+        </div>
         
         <div id="file-list-container" style="display:none; margin-bottom:15px;">
-            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">切换骨架文件:</label>
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">已加载的骨架（再次添加会追加）:</label>
             
             <!-- 标签页切换 -->
             <div class="file-tab-container">
