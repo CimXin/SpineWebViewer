@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spine 万能查看器</title>
+    <style>
+        html, body { margin: 0; background: #111; }
+        #ui, #controls, #file-panel, #effect-panel, #export-modal, #donate-modal, #sheet-modal, #zoom-modal { display: none; }
+    </style>
+    <script src="%BASE_URL%vendor/gif/gif.js"></script>
+</head>
+<body>
+<div id="drop-zone">
+    <!-- 支持用户自定义 Logo：请将您的图片命名为 icon.png 放入同级目录 -->
+    <img src="%BASE_URL%vendor/icon.png" class="logo-icon" onerror="this.style.display='none'; document.getElementById('default-logo').style.display='block';" alt="Logo">
+    <div id="default-logo" class="logo-icon" style="display:none; font-size:120px; line-height: 1;">💎</div>
+    
+    <h1>
+        <span style="position: relative; display: inline-block;">
+            播放器
+            <span style="
+                position: absolute;
+                top: -5px;
+                right: -42px;
+                font-size: 14px;
+                line-height: 1.2;
+                background: linear-gradient(135deg, #00e5ff 0%, #2979ff 100%); 
+                color: #fff; 
+                -webkit-text-fill-color: currentColor;
+                -webkit-background-clip: border-box;
+                padding: 2px 6px; 
+                border-radius: 6px; 
+                font-weight: 800; 
+                box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+                letter-spacing: 0;
+                font-family: Arial, sans-serif;
+                white-space: nowrap;
+            ">3.0</span>
+        </span>
+    </h1>
+    <p style="color:#666; margin-bottom:30px; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; font-weight: 300;">Universal Spine Viewer</p>
+    
+    <div id="web-input">
+        <input type="file" id="folder-input" webkitdirectory directory style="display:none">
+        <button class="btn-folder" onclick="document.getElementById('folder-input').click()">📂 打开动画文件夹</button>
+    </div>
+    <div id="native-input" style="display:none;">
+        <button class="btn-folder" onclick="openNativeFolder()">📂 打开本地文件夹</button>
+    </div>
+</div>
+
+<div id="log">等待文件...</div>
+
+<div id="canvas-wrapper">
+    <!-- 背景参考图层 -->
+    <div id="bg-image-container" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:0; display:none;">
+        <img id="bg-reference" src="" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); opacity:1.0;">
+    </div>
+    
+    <!-- 背景特效层 (Back Layer) Z=1 -->
+    <canvas id="effect-canvas-bg" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
+
+    <!-- 主渲染层 (Z=5) -->
+    <canvas id="canvas" style="position:relative; z-index:5;"></canvas>
+    
+    <!-- 前景特效层 (Front Layer) Z=10 -->
+    <canvas id="effect-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
+    
+    <!-- 调试层 (Z=10) -->
+    <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
+</div>
+
+    <!-- 特效管理面板 (重构版 - 可拖动 + 右侧定位) -->
+    <div id="effect-panel" class="panel" style="position:fixed; top:auto; bottom:120px; right:320px; width:600px; height:520px; display:none; z-index:200; flex-direction:column; padding:0; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform-origin: bottom right;">
+        
+        <!-- 顶部标题栏 (添加 ID 用于拖动句柄) -->
+        <div id="effect-panel-header" style="background:rgba(0,0,0,0.5); padding:10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; cursor: move; user-select: none;">
+            <div style="font-weight:bold; color:white; display:flex; align-items:center; gap:10px;">
+                <span>⚡ 特效管理器</span>
+            </div>
+            <button onclick="document.getElementById('effect-panel').style.display='none'" style="background:none; color:#aaa; font-size:18px; padding:0; cursor: pointer;">×</button>
+        </div>
+
+        <!-- Tab 切换 -->
+        <div style="display:flex; background:#222; border-bottom:1px solid #444;">
+            <div id="tab-eff-res" onclick="window.effectSystem.switchTab('res')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#fff; background:#333; font-weight:bold; border-right:1px solid #444;">1. 特效资源库</div>
+            <div id="tab-eff-bind" onclick="window.effectSystem.switchTab('bind')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#888;">2. 事件绑定配置</div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div style="flex:1; position:relative; overflow:hidden; background:rgba(30,30,30,0.95);">
+            
+            <!-- 1. 资源库页面 -->
+            <div id="page-eff-res" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; padding:15px; box-sizing:border-box;">
+                <button onclick="document.getElementById('effect-upload').click()" class="btn-folder" style="margin:0 0 5px 0; padding:10px; font-size:14px; width:100%;">
+                    📂 导入序列帧文件夹
+                </button>
+                <input type="file" id="effect-upload" webkitdirectory style="display:none" onchange="window.effectSystem.loadEffectFromFiles(this.files)">
+                
+                <button onclick="document.getElementById('sprite-sheet-upload').click()" class="btn-folder" style="margin:0 0 15px 0; padding:10px; font-size:14px; width:100%; background:#4466aa;">
+                    🖼️ 导入精灵图 (Sprite Sheet)
+                </button>
+                <input type="file" id="sprite-sheet-upload" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="window.effectSystem.openSheetConfig(this.files[0])">
+
+                <div style="font-size:12px; color:#888; margin-bottom:5px;">已导入的特效 (点击 ▶ 预览):</div>
+                <div id="effect-res-list" style="flex:1; background:#111; border:1px solid #444; border-radius:4px; overflow-y:auto;">
+                    <!-- 动态生成 -->
+                    <div style="padding:20px; text-align:center; color:#555;">暂无特效，请点击上方按钮导入</div>
+                </div>
+            </div>
+
+            <!-- 2. 绑定配置页面 -->
+            <div id="page-eff-bind" style="position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; padding:15px; box-sizing:border-box;">
+                <div style="font-size:12px; color:#888; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>检测到的骨架事件 (Event)</span>
+                    <span>绑定动作 (Action)</span>
+                </div>
+                
+                <div id="effect-bind-list" style="flex:1; background:#111; border:1px solid #444; border-radius:4px; overflow-y:auto;">
+                    <!-- 动态生成 -->
+                    <div style="padding:20px; text-align:center; color:#555;">未检测到事件，或者未加载模型</div>
+                </div>
+                
+                <div style="margin-top:10px; font-size:11px; color:#666; text-align:center;">
+                    * 绑定后，播放动画时触发对应事件即可自动播放特效
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- 缩放手柄 -->
+        <div id="effect-resize-handle" style="position:absolute; bottom:0; right:0; width:25px; height:25px; cursor:nwse-resize; z-index:20; background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%);"></div>
+    </div>
+    
+    <div id="file-panel" class="panel">
+        <button onclick="location.reload()" class="btn-large">🔄 重置 / 打开新文件</button>
+        
+        <div id="file-list-container" style="display:none; margin-bottom:15px;">
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">切换骨架文件:</label>
+            
+            <!-- 标签页切换 -->
+            <div class="file-tab-container">
+                <div class="file-tab active" id="tab-all" onclick="switchFileTab('all')">全部文件</div>
+                <div class="file-tab" id="tab-fav" onclick="switchFileTab('fav')">★ 我的收藏</div>
+            </div>
+
+            <!-- 搜索框与视图切换 -->
+            <div style="display:flex; align-items:center; gap:5px; margin-bottom: 5px;">
+                <div style="position:relative; flex:1;">
+                    <input type="text" id="spine-file-search" placeholder="🔍 搜索文件名..." oninput="filterSpineFiles(this.value)" style="padding-right: 30px;">
+                    <span id="search-count" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:#666; pointer-events:none;"></span>
+                </div>
+                <!-- 移除了原来的星星按钮，功能转移到 Tab -->
+                <button onclick="toggleFileView()" id="btn-view-mode" style="width:30px; height:30px; background:#333; color:#aaa; font-size:16px; padding:0;" title="切换视图模式 (列表/预览)">≣</button>
+            </div>
+            
+            <!-- 自定义带缩略图的列表 (默认列表模式) -->
+            <div id="custom-file-list" class="view-list"></div>
+            
+            <!-- 隐藏原来的 Select，仅保留作为数据源的兼容性参考(如果不删的话) -->
+            <select id="spine-file-select" style="display:none;"></select>
+        </div>
+
+        <div class="divider"></div>
+    
+    <div style="margin-top:5px;">
+        <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">导出序列帧:</label>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="export-prefix" value="anim" placeholder="前缀">
+            <select id="export-digits" style="width:70px;">
+                <option value="2">00</option>
+                <option value="3" selected>000</option>
+                <option value="4">0000</option>
+            </select>
+        </div>
+        
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;">格式:</label>
+            <select id="export-format" style="width:100%; background:#222; border:1px solid #444; color:#eee; border-radius:4px;">
+                <option value="png">PNG 序列帧 (默认)</option>
+                <option value="gif">GIF 动图 (支持透明)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;">缩放:</label>
+            <input type="number" id="export-scale" value="1.0" step="0.1" min="0.1" max="5.0" style="background:#222; border:1px solid #444; color:#fff; padding:4px; border-radius:4px; width:100%;">
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;">批量:</label>
+            <label style="color:#eee; font-size:12px; display:flex; align-items:center; cursor:pointer;">
+                <input type="checkbox" id="export-batch" style="width:16px; height:16px; margin-right:5px;"> 导出所有动作
+            </label>
+        </div>
+
+        <button onclick="exportSequence()" class="btn-export">📂 选择文件夹并导出</button>
+    </div>
+</div>
+
+<div id="ui" class="panel">
+    
+    <!-- 1. 动画模块 (默认打开) -->
+    <div class="ui-group open">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">🎬 动画 (Animation)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;">主动画 (Track 0)</label>
+                <select id="anim-select"></select>
+                
+                <div id="extra-tracks-container" style="margin-top:8px;"></div>
+                <button onclick="addTrack()" style="width:100%; margin-top:8px; padding:6px; background:#333; font-size:12px; color:#aaa; border:1px dashed #555; border-radius:4px; cursor:pointer; transition:all 0.2s;">
+                    ➕ 添加叠加轨道 (Add Track)
+                </button>
+            </div>
+            
+            <div style="margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;">选择皮肤</label>
+                <!-- 4.1 / 4.2 使用传统下拉菜单 -->
+                <select id="skin-select" style="display:block;"></select>
+                <!-- 3.8 使用混搭列表 -->
+                <div id="skin-list" style="display:none; max-height:150px; overflow-y:auto; background:#222; border:1px solid #444; border-radius:6px; padding:5px;"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-row">
+                <label>预乘 Alpha (PMA)</label>
+                <div style="display:flex; gap:10px;">
+                     <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，图片加载时不进行预乘（因为图片已经预乘过了），渲染时使用 One 混合模式。">
+                        <input type="checkbox" id="chk-pma" checked onchange="window.togglePMA(this.checked)"> PMA
+                    </label>
+                    <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，让 WebGL 在加载图片时自动乘上 Alpha。通常用于直通(Straight)导出的图片。">
+                        <input type="checkbox" id="chk-unpack" onchange="window.toggleUnpack(this.checked)"> Unpack
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 骨骼显示模块 (默认关闭) -->
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">💀 骨骼显示 (Bones)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+             <div class="control-row">
+                <label>显示骨骼</label>
+                <input type="checkbox" id="chk-bones" onchange="window.viewerConfig.showBones = this.checked">
+            </div>
+            
+            <div class="control-row">
+                <label>骨骼颜色</label>
+                <div class="color-group">
+                    <div class="color-preset" onclick="setBoneColor('#00ff00')" style="background:#00ff00;"></div>
+                    <div class="color-preset" onclick="setBoneColor('#00ccff')" style="background:#00ccff;"></div>
+                    <div class="color-preset" onclick="setBoneColor('#ff0055')" style="background:#ff0055;"></div>
+                    <div class="color-preset" onclick="setBoneColor('#ffff00')" style="background:#ffff00;"></div>
+                    <input type="color" id="bone-color" value="#00ff00">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <label>骨骼粗细</label>
+                <input type="range" id="bone-scale" min="0.5" max="3.0" step="0.1" value="1.0" style="width:120px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 事件监视器 (默认关闭) -->
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">⚡ 事件监视器 (Events)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+             <!-- 控制栏 -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:8px;">
+                <button onclick="document.getElementById('effect-panel').style.display='flex'" class="btn-shine" style="width:100%; padding:12px; margin-bottom:5px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#fff; background: linear-gradient(45deg, #ff357a, #fff172); box-shadow: 0 4px 15px rgba(255, 53, 122, 0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: transform 0.2s, box-shadow 0.2s;">
+                    ✨ 管理特效 / 绑定 (Manage Effects)
+                </button>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:12px; color:#aaa; display:flex; align-items:center;">
+                        <input type="checkbox" checked onchange="window.eventSystem.showToasts = this.checked" style="margin-right:5px;"> 显示弹幕
+                    </label>
+                    <button onclick="document.getElementById('event-log').innerHTML=''" style="font-size:10px; background:#444; border:none; color:#bbb; cursor:pointer; padding:2px 6px; border-radius:4px;">清空</button>
+                </div>
+                
+                <!-- 颜色选择器 -->
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label style="font-size:11px; color:#888;">颜色:</label>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffcc00')" style="background:#ffcc00; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="默认黄"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ff0055')" style="background:#ff0055; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="红"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ff99')" style="background:#00ff99; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="绿"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ccff')" style="background:#00ccff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="蓝"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffffff')" style="background:#ffffff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="白"></div>
+                    <input type="color" id="event-color-picker" value="#ffcc00" oninput="window.eventSystem.setColor(this.value)" style="width:20px; height:20px; border:none; padding:0; background:none;">
+                </div>
+            </div>
+            
+            <!-- 日志区 -->
+            <div id="event-log" style="font-family: monospace; font-size: 11px; color: #aaa; max-height: 150px; overflow-y: auto;">
+                <div style="color:#666; font-style:italic;">等待事件触发...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 参考背景图 (默认打开) -->
+    <div class="ui-group open">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">🖼️ 参考背景 (Reference)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            
+             <!-- 背景颜色 (整合到这里) -->
+             <div class="control-row" style="margin-bottom:10px; border-bottom:1px dashed #444; padding-bottom:10px;">
+                <label>背景颜色</label>
+                <div class="color-group">
+                    <div class="color-preset" onclick="setBgColor('#333333')" style="background:#333333;"></div>
+                    <div class="color-preset" onclick="setBgColor('#555555')" style="background:#555555;"></div>
+                    <div class="color-preset" onclick="setBgColor('#2b303b')" style="background:#2b303b;"></div>
+                    <div class="color-preset" onclick="setBgCheckerboard()" title="透明/棋盘格"
+                         style="background-color:#fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;">
+                    </div>
+                    <input type="color" id="bg-color" value="#333333">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                <label style="color:#bbb; font-size:13px;">背景图片</label>
+                <label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="bg-visible" checked onchange="toggleBgVisibility(this.checked)"> 显示
+                </label>
+            </div>
+            
+            <div style="display:flex; gap:5px; margin-bottom:8px;">
+                <button onclick="document.getElementById('bg-upload').click()" style="flex:1; background:#444; color:#fff; padding:4px; font-size:12px;">📂 选择</button>
+                <input type="file" id="bg-upload" accept="image/*" style="display:none" onchange="loadBgImage(this)">
+                <button onclick="resetBgParams()" style="width:30px; background:#4466aa; color:#fff;" title="重置参数">↺</button>
+                <button onclick="clearBgImage()" style="width:30px; background:#633; color:#fff;" title="移除">×</button>
+            </div>
+            
+            <div id="bg-controls" style="display:none; flex-direction:column; gap:5px;">
+                <div class="control-row">
+                    <label>X 位移</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="bg-x" min="-1000" max="1000" value="0" step="1" oninput="updateBgFromSlider('bg-x')" style="width:70px;">
+                        <input type="number" id="val-bg-x" value="0" step="1" oninput="updateBgFromInput('bg-x')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <label>Y 位移</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="bg-y" min="-1000" max="1000" value="0" step="1" oninput="updateBgFromSlider('bg-y')" style="width:70px;">
+                        <input type="number" id="val-bg-y" value="0" step="1" oninput="updateBgFromInput('bg-y')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <label>大小</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="bg-scale" min="0.1" max="5.0" value="1.0" step="0.01" oninput="updateBgFromSlider('bg-scale')" style="width:70px;">
+                        <input type="number" id="val-bg-scale" value="1.0" step="0.1" oninput="updateBgFromInput('bg-scale')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <label>透明度</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="bg-opacity" min="0.1" max="1.0" value="1.0" step="0.01" oninput="updateBgFromSlider('bg-opacity')" style="width:70px;">
+                        <input type="number" id="val-bg-opacity" value="1.0" step="0.1" max="1.0" min="0" oninput="updateBgFromInput('bg-opacity')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. 角色调色板 (默认关闭) -->
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">🎨 角色调色板 (Color)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <div id="color-filter-content" style="display:block;">
+                 <div class="control-row">
+                    <label>色相 (Hue)</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="filter-hue" min="0" max="360" value="0" step="1" oninput="updateCharacterFilter()" style="flex:1;">
+                        <span id="val-hue" style="font-size:11px; color:#aaa; width:25px; text-align:right;">0°</span>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <label>饱和度 (Sat)</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="filter-sat" min="0" max="200" value="100" step="1" oninput="updateCharacterFilter()" style="flex:1;">
+                        <span id="val-sat" style="font-size:11px; color:#aaa; width:25px; text-align:right;">100</span>
+                    </div>
+                </div>
+    
+                <div class="control-row">
+                    <label>亮度 (Light)</label>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <input type="range" id="filter-bri" min="0" max="200" value="100" step="1" oninput="updateCharacterFilter()" style="flex:1;">
+                        <span id="val-bri" style="font-size:11px; color:#aaa; width:25px; text-align:right;">100</span>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                     <label>整体染色 (Tint)</label>
+                     <div style="display:flex; align-items:center; gap:5px;">
+                         <input type="color" id="skeleton-tint" value="#ffffff" oninput="updateSkeletonTint(this.value)">
+                         <button onclick="resetColorFilters()" style="padding:2px 6px; font-size:10px; background:#444; color:#fff;">重置</button>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 左下角独立打赏按钮 -->
+<button onclick="showDonate()" id="btn-donate-fixed" title="支持作者">
+    ☕
+</button>
+
+<div id="export-modal">
+    <h2 style="color:white;">正在导出序列帧...</h2>
+    <div id="export-progress-bar"><div id="export-progress-fill"></div></div>
+    <p id="export-status" style="color:#aaa; margin-top:10px;">0 / 0</p>
+</div>
+
+<div id="controls" class="panel">
+    <div class="play-row">
+        <button id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
+        <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
+        <div style="display:flex; align-items:center; gap:5px; margin-left:10px;">
+            <select id="time-unit-select" style="width:40px;">
+                <option value="seconds">s</option>
+                <option value="frames">f</option>
+            </select>
+            <span id="time-text" style="font-family:monospace; font-size:12px; min-width:80px; text-align:right;">0.00 / 0.00</span>
+        </div>
+    </div>
+
+    <div class="play-row" style="justify-content: center; gap: 20px;">
+         <div class="control-group">
+            <label style="font-size:12px; color:#aaa;">倍速</label>
+            <select id="speed-select" style="width:60px;">
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1.0" selected>1.0x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2.0">2.0x</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label style="font-size:12px; color:#aaa;">帧率</label>
+            <select id="fps-select" style="width:50px;">
+                <option value="24">24</option>
+                <option value="30">30</option>
+                <option value="60" selected>60</option>
+            </select>
+        </div>
+        <button onclick="if(window.resetView) window.resetView()">归位</button>
+    </div>
+    
+    <div class="play-row" style="margin-top:5px; border-top:1px solid #555; padding-top:10px; opacity:0.6;">
+        <span style="font-size:12px;">X</span> <input type="range" id="posX" min="-2000" max="2000" value="0" step="10" style="width:100px;">
+        <span style="font-size:12px;">Y</span> <input type="range" id="posY" min="-2000" max="2000" value="0" step="10" style="width:100px;">
+    </div>
+</div>
+
+<div id="version-container" style="position: fixed; bottom: 15px; right: 20px; z-index: 100; pointer-events: auto; display: flex; align-items: center; gap: 8px;">
+    <div id="version-label" style="display:none">Waiting...</div>
+    <select id="version-select" onchange="forceSwitchVersion(this.value)" style="background: rgba(0,0,0,0.5); border: 1px solid #666; color: #aaa; font-weight: bold; font-size: 14px; padding: 4px; border-radius: 4px; width: auto; cursor: pointer;">
+        <option value="" disabled selected>自动识别</option>
+        <option value="3.6">3.6</option>
+        <option value="3.7">3.7</option>
+        <option value="3.8">3.8</option>
+        <option value="4.0">4.0</option>
+        <option value="4.1">4.1</option>
+        <option value="4.2">4.2</option>
+    </select>
+</div>
+
+    <!-- 精灵图切分配置弹窗 -->
+    <div id="sheet-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#222; padding:20px; border-radius:8px; width:400px; box-shadow:0 0 20px rgba(0,0,0,0.8); border:1px solid #444;">
+            <h3 style="margin:0 0 15px 0; color:#fff;">📐 精灵图切分配置</h3>
+            
+            <div style="display:flex; gap:15px; margin-bottom:15px;">
+                <div style="width:120px; height:120px; background:#000; display:flex; align-items:center; justify-content:center; border:1px solid #444;">
+                    <img id="sheet-preview" src="" style="max-width:100%; max-height:100%;">
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <label style="color:#aaa; font-size:12px;">行数 (Rows):</label>
+                        <input type="text" id="sheet-rows" value="1" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
+                    </div>
+                    <div>
+                        <label style="color:#aaa; font-size:12px;">列数 (Columns):</label>
+                        <input type="text" id="sheet-cols" value="1" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
+                    </div>
+                    <div>
+                        <label style="color:#aaa; font-size:12px;">总帧数 (Total Frames):</label>
+                        <input type="text" id="sheet-total" value="" placeholder="默认全部" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="document.getElementById('sheet-modal').style.display='none'" style="padding:8px 15px; background:#444; color:#fff; border:none; border-radius:4px; cursor:pointer;">取消</button>
+                <button onclick="window.effectSystem.confirmSlice()" style="padding:8px 15px; background:#2a9; color:#fff; border:none; border-radius:4px; cursor:pointer;">确认导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打赏弹窗 -->
+    <div id="donate-modal">
+        <div class="donate-content" style="background: linear-gradient(145deg, #2a2a2a, #222); border: 1px solid #555;">
+            <button class="donate-close" onclick="document.getElementById('donate-modal').style.display='none'" style="font-size:28px;">×</button>
+            
+            <h2 style="color: #ff9a9e; margin-top: 5px; margin-bottom: 20px; font-size: 26px; text-shadow: 0 2px 10px rgba(255,154,158,0.3);">
+                ☕ 感谢您的支持 ☕
+            </h2>
+            
+            <div style="font-size: 16px; line-height: 1.8; color: #eee; margin-bottom: 25px; font-weight: 500;">
+                如果您觉得还不错，<br>
+                不妨请我喝杯咖啡 ☕<br>
+                <span style="color: #ffc371; font-size: 15px;">我会写得更有精神一点 😄</span>
+            </div>
+            
+            <div class="qr-container">
+                <div class="qr-box">
+                    <div id="qr-wx" class="qr-img qr-empty">未配置</div>
+                    <div class="qr-label" style="color:#09bb07">WeChat (微信)</div>
+                </div>
+                <div class="qr-box">
+                    <div id="qr-zfb" class="qr-img qr-empty">未配置</div>
+                    <div class="qr-label" style="color:#108ee9">Alipay (支付宝)</div>
+                </div>
+            </div>
+            
+            <div style="font-size: 12px; color: #888; margin-top: 15px; line-height: 1.6;">
+                本仓库未附带收款码。如需展示，把图片放到
+                <code>public/vendor/donate/</code> 并在页面里换成对应地址。
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大灯箱 -->
+    <div id="zoom-modal" onclick="this.style.display='none'">
+        <img id="zoom-img" src="">
+        <div style="position:absolute; bottom:30px; color:#aaa; font-size:14px; background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px;">
+            点击任意处关闭
+        </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

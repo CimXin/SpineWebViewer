@@ -1,0 +1,615 @@
+/* 炫彩按钮呼吸动画 */
+        @keyframes btn-shine-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-shine {
+            background-size: 200% auto !important;
+            animation: btn-shine-anim 3s ease infinite;
+        }
+        .btn-shine:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 53, 122, 0.6) !important;
+        }
+
+        /* ================= UI 美化版 ================= */
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #eee; }
+        
+        /* 布局容器 */
+        #canvas-wrapper { position: relative; width: 100vw; height: 100vh; background-color: #333; }
+        canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        #debug-canvas { pointer-events: none; z-index: 10; }
+        #effect-canvas { pointer-events: none; z-index: 8; }
+        #canvas { z-index: 5; }
+        
+        /* 背景图层 */
+        #bg-image-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; /* 在背景色之上，Canvas 之下 */
+            pointer-events: none;
+            overflow: hidden;
+            display: none; /* 默认隐藏 */
+        }
+        
+        /* 通用面板样式 */
+        .panel {
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 控件行：统一高度和对齐 */
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            height: 28px; /* 强制统一高度 */
+        }
+        .control-row label {
+            font-size: 13px;
+            color: #bbb;
+            font-weight: 500;
+        }
+
+        /* 按钮通用样式 */
+        button {
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex; justify-content: center; align-items: center;
+        }
+        button:active { transform: scale(0.98); }
+
+        /* 特大按钮（重置/打开） */
+        .btn-large {
+            width: 100%;
+            height: 48px; /* 加大高度 */
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-large:hover { background: linear-gradient(135deg, #5aa0f2, #458acd); box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4); }
+
+        /* 导出按钮 */
+        .btn-export {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #f5a623, #d08816);
+            color: #222;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
+            margin-top: 10px;
+        }
+        .btn-export:hover { background: linear-gradient(135deg, #ffb733, #e09826); color: #000; }
+
+        /* 输入框和下拉单 */
+        select, input[type="text"] {
+            background: #222;
+            border: 1px solid #444;
+            color: #eee;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border 0.2s;
+        }
+        select:focus, input[type="text"]:focus { border-color: #666; background: #2a2a2a; }
+
+        /* 颜色预设方块 */
+        .color-group { display: flex; gap: 6px; align-items: center; }
+        .color-preset {
+            width: 20px; height: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s;
+        }
+        .color-preset:hover { transform: scale(1.15); border-color: white; }
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none; width: 24px; height: 24px; padding: 0; background: none; cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid #666; border-radius: 4px; }
+
+        /* 滑块美化 */
+        input[type=range] {
+            -webkit-appearance: none; width: 100px; height: 4px; background: #444; border-radius: 2px; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 14px; height: 14px; background: #888; border-radius: 50%; cursor: pointer; transition: background 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { background: #fff; }
+
+        /* Checkbox 美化 */
+        input[type=checkbox] {
+            width: 18px; height: 18px; accent-color: #00e5ff; cursor: pointer;
+        }
+
+        /* 左上角文件面板 */
+        #file-panel {
+            position: fixed; top: 20px; left: 20px; 
+            bottom: auto; /* 取消底部固定，改用最大高度 */
+            max-height: 65vh; /* 限制最大高度为屏幕高度的 65%，留出底部空间 */
+            width: 320px; 
+            z-index: 10;
+            display: none; 
+            flex-direction: column;
+            overflow-y: auto; 
+            /* 增加底部阴影，让它看起来像浮在空中 */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
+        }
+
+        /* 增强的滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px; /* 稍微加宽，更容易点中 */
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555; 
+            border-radius: 4px;
+            border: 1px solid #333; /* 增加对比度 */
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777; /* 悬停高亮 */
+        }
+
+        /* 自定义文件列表容器 */
+        #custom-file-list {
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 6px;
+            max-height: 300px; /* 限制高度，内部滚动 */
+            overflow-y: auto;
+            margin-top: 5px;
+        }
+        
+        /* 列表模式：紧凑 */
+        #custom-file-list.view-list .file-item {
+            padding: 4px 8px;
+        }
+        #custom-file-list.view-list .file-thumb {
+            display: none; /* 列表模式隐藏图片 */
+        }
+        #custom-file-list.view-list .file-name {
+            font-size: 13px;
+        }
+        
+        /* 预览模式：大图 */
+        #custom-file-list.view-grid .file-item {
+            padding: 8px;
+        }
+        #custom-file-list.view-grid .file-thumb {
+            display: block;
+            width: 48px; height: 48px;
+        }
+        
+        /* 列表项 */
+        .file-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background 0.2s;
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background: #333; }
+        .file-item.active { background: #004466; border-left: 3px solid #00e5ff; }
+        
+        /* 收藏星星样式 */
+        .star-btn {
+            font-size: 18px;
+            color: #444;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 2px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .star-btn.active {
+            color: #ffcc00;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+        }
+        .star-btn:hover {
+            transform: scale(1.2);
+            color: #fff;
+        }
+
+        /* 标签页样式 */
+        .file-tab-container {
+            display: flex;
+            margin-bottom: 10px;
+            background: #222;
+            border-radius: 6px;
+            padding: 2px;
+            border: 1px solid #444;
+        }
+        .file-tab {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #888;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .file-tab.active {
+            background: #00e5ff;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 229, 255, 0.3);
+        }
+        .file-tab:hover:not(.active) {
+            background: #333;
+            color: #ccc;
+        }
+
+        .file-thumb {
+            background: #111;
+            border-radius: 4px;
+            margin-right: 10px;
+            object-fit: contain;
+            border: 1px solid #444;
+            flex-shrink: 0;
+        }
+        
+        .file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .file-name {
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        
+        .file-path {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    /* 右上角控制面板 */
+    #ui {
+        position: fixed; top: 20px; right: 20px; bottom: 80px;
+        width: 300px; /* 稍微加宽以适应折叠UI */
+        z-index: 10;
+        display: none; /* JS控制显示 */
+        flex-direction: column;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        gap: 8px; /* 模块间距 */
+    }
+
+    /* 折叠模块样式 */
+    .ui-group {
+        background: #252525;
+        border: 1px solid #444;
+        border-radius: 6px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+        margin-bottom: 2px;
+    }
+    .ui-group:hover {
+        border-color: #666;
+    }
+    
+    .ui-header {
+        padding: 10px 12px;
+        background: #333;
+        border-bottom: 1px solid #333;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        transition: background 0.2s;
+    }
+    .ui-header:hover {
+        background: #3a3a3a;
+    }
+    .ui-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ui-arrow {
+        font-size: 10px;
+        color: #888;
+        transition: transform 0.2s;
+    }
+    
+    .ui-content {
+        padding: 12px;
+        background: #222; /* 更深的背景 */
+        display: none; 
+        border-top: 1px solid #444;
+    }
+    
+    /* 折叠状态控制 */
+    .ui-group.open .ui-content { display: block; }
+    .ui-group.open .ui-arrow { transform: rotate(90deg); }
+    .ui-group.open .ui-header { background: #2a2a2a; border-bottom-color: #444; }
+
+
+    /* 特效列表弹窗 */
+    #effect-panel {
+        position: fixed; 
+        top: auto;        /* 移除顶部定位 */
+        bottom: 120px;    /* 距离底部 120px (避开播放条) */
+        right: 320px;     /* 保持在右侧面板的左边 */
+        width: 380px;     /* 稍微加宽一点，更好看 */
+        height: 380px;    /* 默认高度 */
+        display: none; 
+        z-index: 100;
+        flex-direction: column;
+        /* 添加阴影增强层次感 */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    }
+
+        /* 底部播放条 */
+        #controls {
+            position: absolute; bottom: 30px; left: 50%;
+            transform: translateX(-50%);
+            width: 540px;
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        /* 播放控制行 */
+        .play-row { display: flex; align-items: center; gap: 15px; width: 100%; }
+        #timeline { flex: 1; height: 6px; background: #444; border-radius: 3px; }
+        #timeline::-webkit-slider-thumb { width: 16px; height: 16px; background: #00e5ff; }
+        #btn-play { width: 40px; background: #00e5ff; color: #000; font-weight: bold; }
+
+        /* 右下角信息 */
+        #log { position: fixed; bottom: 50px; right: 20px; pointer-events:none; z-index:200; font-family:'Consolas', monospace; color:#00ff9d; font-size:16px; text-align: right; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { width: 0; }
+        
+        /* 分隔线 */
+        .divider { border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0; padding-top: 15px; }
+
+        /* 拖拽区域 */
+        #drop-zone {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #333 0%, #000 100%); /* 更深邃的背景 */
+            color: white; font-size: 24px;
+            z-index: 100; pointer-events: none; opacity: 1; transition: opacity 0.5s;
+            flex-direction: column; gap: 20px;
+        }
+        
+        .logo-icon {
+            width: 280px; height: auto; object-fit: contain; /* 加大图片，自适应高度 */
+            margin-bottom: 10px; /* 减小底部间距，因为图片本身可能有留白 */
+            filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.4)); /* 增强光晕 */
+            animation: float 4s ease-in-out infinite; /* 调慢浮动速度，更优雅 */
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1.0); opacity: 0; }
+        }
+        
+        @keyframes flash {
+            0% { background-color: rgba(255, 204, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+
+        h1 {
+            font-size: 56px; /* 加大标题 */
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            color: #fff;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            letter-spacing: 8px; /* 增加字间距，更有设计感 */
+            text-transform: uppercase;
+        }
+
+        .btn-folder {
+            margin-top: 20px; /* 增加上方间距 */
+            padding: 18px 50px; font-size: 20px; 
+            background: linear-gradient(135deg, #00e5ff, #0099cc);
+            color: #fff; border: none; border-radius: 50px; 
+            cursor: pointer; font-weight: bold;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            letter-spacing: 2px;
+        }
+        .btn-folder:hover { 
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.5); 
+        }
+        .btn-folder:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* 打赏按钮 & 弹窗 */
+        .btn-donate {
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 95, 109, 0.4);
+            animation: pulse-gold 2s infinite;
+        }
+        .btn-donate:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 95, 109, 0.6); }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 195, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 195, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 195, 113, 0); }
+        }
+
+        #donate-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000;
+            backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
+        }
+        .donate-content {
+            background: #222; border: 1px solid #444; border-radius: 12px;
+            padding: 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            max-width: 600px; width: 90%;
+            position: relative;
+            transform: scale(0.9); opacity: 0;
+            animation: modalPop 0.3s forwards;
+        }
+        @keyframes modalPop {
+            to { transform: scale(1); opacity: 1; }
+        }
+        .qr-container {
+            display: flex; justify-content: center; gap: 30px; margin: 20px 0; flex-wrap: wrap;
+        }
+        .qr-box {
+            background: white; padding: 10px; border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .qr-img {
+            width: 200px; height: 200px; object-fit: contain;
+            background: #eee; /* 占位色 */
+        }
+        .qr-img.qr-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 14px;
+            cursor: default;
+        }
+        .qr-img.qr-empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .qr-label {
+            margin-top: 10px; color: #333; font-weight: bold; font-size: 14px;
+        }
+        .donate-close {
+            position: absolute; top: 10px; right: 15px;
+            background: none; border: none; color: #888; font-size: 24px; cursor: pointer;
+        }
+        .donate-close:hover { color: #fff; }
+
+        /* 左下角独立打赏按钮样式 */
+        #btn-donate-fixed {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            color: white;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(255, 95, 109, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            animation: pulse-gold 3s infinite;
+        }
+        #btn-donate-fixed:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 95, 109, 0.6);
+        }
+        /* 二维码放大镜效果 */
+        .qr-img {
+            width: 200px; height: 200px; object-fit: contain;
+            background: #eee;
+            cursor: zoom-in; /* 鼠标变成放大镜 */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .qr-img:hover {
+            transform: scale(1.05); /* 悬停轻微放大 */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* 全屏放大灯箱 */
+        #export-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            background: rgba(0, 0, 0, 0.78);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #export-progress-bar {
+            width: 320px;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #export-progress-fill {
+            width: 0;
+            height: 100%;
+            background: #00e5ff;
+        }
+
+        #zoom-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92); z-index: 3000; /* 比打赏弹窗更高 */
+            justify-content: center; align-items: center;
+            cursor: zoom-out; /* 鼠标变成缩小镜 */
+            opacity: 0; animation: fadeIn 0.25s forwards;
+            backdrop-filter: blur(5px);
+        }
+        #zoom-img {
+            max-width: 85vh; max-height: 85vh; /* 保证不超出屏幕 */
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transform: scale(0.8);
+            animation: zoomPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes zoomPop { to { transform: scale(1); } }

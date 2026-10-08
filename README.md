@@ -1,1 +1,101 @@
-# SpineWebViewer
+# Spine Web Viewer
+
+本地预览 Spine 动画的静态网页查看器。界面和播放逻辑改编自 Spine 播放器 3.0：打开文件夹、骨架列表（搜索 / 收藏）、播放与拖动时间轴、镜头平移缩放、皮肤混搭、多轨道、骨骼调试、事件、序列帧特效绑定、背景参考图、调色，以及 PNG 序列帧 / GIF / WebM 导出。
+
+运行时不是把旧压缩包里的 `spine-webgl-*.js` 原样塞进仓库，而是按版本从 Esoteric Software 的官方发布拉取。版本适配器（`public/runtime/logic/`）仍沿用参考播放器里针对各版本 WebGL API 的加载与渲染代码。
+
+## 环境
+
+- Node.js 18 或更高
+- 现代浏览器（Chrome / Edge）。文件夹选择和导出目录使用浏览器文件 API，需要通过本地开发服务器或 HTTPS 打开，不要直接双击 `index.html`。
+
+## 安装与运行
+
+```bash
+npm install
+npm run dev
+```
+
+浏览器打开终端里给出的地址（默认 `http://localhost:5173`）。
+
+生产构建：
+
+```bash
+npm run build
+npm run preview
+```
+
+`dist/` 是可部署的静态站点。用任意静态服务器托管即可，例如：
+
+```bash
+npx vite preview
+# 或
+npx serve dist
+```
+
+`package.json` 里唯一的依赖是开发用的 Vite，没有 UI 框架，也没有额外的运行时 npm 包。GIF 编码使用随参考播放器附带的 [gif.js 0.2.0](https://github.com/jnordberg/gif.js)（`public/vendor/gif/`）。
+
+## 加载本地动画
+
+1. 点击 **打开动画文件夹**，或把文件夹拖进页面。
+2. 选择包含整套资源的目录。支持子目录。每一套至少要有：
+   - 骨架数据：`.json` / `.json.txt`，或 `.skel` / `.skel.bytes`
+   - 图集：`.atlas` 或 `.atlas.txt`
+   - 贴图：`.png` / `.jpg` / `.webp`
+3. 左侧列出扫描到的骨架。可以搜索，点星标收藏。点某一项开始预览。
+4. 版本会从 JSON 的 `skeleton.spine` 或二进制文件头里自动判断。右下角也可以手动指定 3.6、3.7、3.8、4.0、4.1、4.2。
+
+播放：底部按钮或空格键暂停 / 继续，拖动时间轴，切换倍速和帧率。画面上按住左键平移，滚轮缩放，**归位** 恢复镜头。
+
+导出 PNG 序列帧或 GIF 时，浏览器会要求选择一个保存目录（File System Access API）。导出过程中保持这个标签页在前台。
+
+## 支持的 Spine 版本
+
+| 版本 | 来源 | 当前钉住的发布 |
+| --- | --- | --- |
+| 3.6 | [spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) 标签里的 `spine-ts/build/spine-webgl.js` | `3.6.53` |
+| 3.7 | 同上 | `3.7.94` |
+| 3.8 | 同上 | `3.8.95` |
+| 4.0 | npm `@esotericsoftware/spine-webgl` 的 `dist/iife/spine-webgl.js` | `4.0.31` |
+| 4.1 | 同上 | `4.1.55` |
+| 4.2 | 同上 | `4.2.119` |
+
+这些文件在 `public/vendor/spine/<版本>/`，旁边有对应的 `LICENSE`。清单见 `public/vendor/spine/versions.json`。脚本加载时会先注入该版本的官方 `spine-webgl.js`（全局变量 `spine`），再注入 `public/runtime/logic/logic_<版本>.js`。
+
+3.6 / 3.7 的官方 Web 运行时没有完整的二进制解析器。这两个版本请导出 JSON。3.8 及以上 JSON 和二进制都可以。
+
+## 更新运行时
+
+编辑 `scripts/fetch-runtimes.mjs` 里的标签或 npm 版本（同一条主版本线内的补丁，例如把 `4.2.119` 换成更新的 `4.2.x`），然后：
+
+```bash
+npm run fetch-runtimes
+```
+
+脚本会重新下载 IIFE / 预构建文件和许可证，并重写 `versions.json`。同一主版本的导出格式兼容；若 Esoteric 改了 WebGL 类名，需要对照 `public/runtime/logic/logic_*.js` 里的 `spine.*` 调用一起改。
+
+官方仓库：<https://github.com/EsotericSoftware/spine-runtimes>  
+4.x 的浏览器包说明：<https://github.com/EsotericSoftware/spine-runtimes/blob/4.2/spine-ts/README.md>
+
+## 目录
+
+```
+index.html                 页面入口
+src/main.js                Vite 入口，按顺序加载各模块
+src/styles/app.css         界面样式
+src/state/globals.js       全局配置与颜色 / 日志
+src/files/file-handler.js  文件夹扫描、拖放、收藏数据
+src/loader/spine-loader.js 版本识别，加载官方运行时
+src/viewer/                播放、镜头背景、骨骼调试、多轨道
+src/effects/               事件与序列帧特效
+src/export/                PNG / GIF / WebM 导出
+src/config/                本地设置记忆
+src/boot.js                启动时的界面初始化
+public/vendor/spine/       官方 spine-webgl 运行时
+public/runtime/logic/      各版本加载与渲染适配
+public/vendor/gif/         gif.js 与 worker
+```
+
+## 许可
+
+查看器业务代码改编自参考播放器。Spine 运行时使用 [Spine Runtimes License](http://esotericsoftware.com/spine-runtimes-license)，每个版本目录下有一份 `LICENSE`。使用这些运行时需要遵守 Esoteric Software 的许可条款（通常需要有效的 Spine 编辑器许可）。gif.js 以其仓库中的 MIT 许可发布。
