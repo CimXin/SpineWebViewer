@@ -88,7 +88,12 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     document.getElementById('file-panel').style.display = 'flex';
     const dropZone = document.getElementById('drop-zone');
     dropZone.style.opacity = 0;
-    setTimeout(() => dropZone.style.display = 'none', 500);
+    window.__dropZoneToken = (window.__dropZoneToken || 0) + 1;
+    const dropToken = window.__dropZoneToken;
+    setTimeout(() => {
+        if (window.__dropZoneToken !== dropToken) return;
+        dropZone.style.display = 'none';
+    }, 500);
 
     // 隐藏不需要的 UI
     document.getElementById('ui').style.display = 'none';

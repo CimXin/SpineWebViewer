@@ -6,15 +6,15 @@
 
 ## 下载后直接使用
 
-发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.1/SpineWebViewer-v1.0.1.zip>
+发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.2/SpineWebViewer-v1.0.2.zip>
 
-1. 下载 `SpineWebViewer-v1.0.1.zip` 并解压。
+1. 下载 `SpineWebViewer-v1.0.2.zip` 并解压。
 2. 不要直接双击 `index.html`。Chrome 等浏览器会拦截 `file://` 下的模块脚本，导出功能也只允许在 localhost 里选择保存目录。
 3. 用解压目录里的启动脚本打开（脚本会在本机起一个页面并自动打开浏览器）：
    - Windows：双击 `Start-Windows.bat`。有 Python 就用 Python；没有则用系统自带的 PowerShell，不用再安装 Node。
    - macOS：双击 `Start-Mac.command`（若被拦截，右键该文件再选“打开”）。
    - Linux：在解压目录执行 `bash Start-Linux.sh`。
-4. 在页面里点 **打开动画文件夹**，选中包含 `.json` 或 `.skel`、`.atlas` 和贴图的整个文件夹。
+4. 在页面里点 **打开动画文件夹**，选中包含 `.json` 或 `.skel`、`.atlas` 和贴图的整个文件夹。也可以点 **添加单个动画**，同时选中这一套的数据、图集和贴图。再次添加会追加到左侧列表；点 **清空列表** 才会清掉。
 
 关掉启动脚本那个窗口即停止服务。压缩包里的 `OPEN.txt` 是同样的说明。
 
@@ -25,7 +25,7 @@ npm install
 npm run package
 ```
 
-`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.1.zip`。
+`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.2.zip`。
 
 ## 环境
 
@@ -61,13 +61,15 @@ npx serve dist
 
 ## 加载本地动画
 
-1. 点击 **打开动画文件夹**，或把文件夹拖进页面。
-2. 选择包含整套资源的目录。支持子目录。每一套至少要有：
+1. **打开动画文件夹**（或把文件夹拖进页面）会扫描目录里的全部骨架，并追加到左侧列表。
+2. **添加单个动画** 用来追加一套资源：在文件框里同时选中 `.json`/`.skel`、`.atlas` 和贴图。文件名不一致也可以，只要这一次只选了一套。
+3. 每一套至少要有：
    - 骨架数据：`.json` / `.json.txt`，或 `.skel` / `.skel.bytes`
    - 图集：`.atlas` 或 `.atlas.txt`
    - 贴图：`.png` / `.jpg` / `.webp`
-3. 左侧列出扫描到的骨架。可以搜索，点星标收藏。点某一项开始预览。
-4. 版本会从 JSON 的 `skeleton.spine` 或二进制文件头里自动判断。右下角也可以手动指定 3.6、3.7、3.8、4.0、4.1、4.2。
+4. 再次添加不会清掉已经在列表里的骨架。路径、文件名、大小和修改时间都相同的条目会跳过。左侧 **清空列表** 用来全部移除。
+5. 列表可以搜索，点星标收藏。点某一项开始预览。
+6. 版本会从 JSON 的 `skeleton.spine` 或二进制文件头里自动判断。右下角也可以手动指定 3.6、3.7、3.8、4.0、4.1、4.2。
 
 播放：底部按钮或空格键暂停 / 继续，拖动时间轴，切换倍速和帧率。画面上按住左键平移，滚轮缩放，**归位** 恢复镜头。
 

@@ -464,6 +464,46 @@
         .btn-folder:active {
             transform: translateY(1px) scale(0.98);
         }
+        .btn-folder.secondary {
+            margin-top: 0;
+            padding: 12px 28px;
+            font-size: 16px;
+            background: transparent;
+            color: #ddd;
+            border: 1px solid #666;
+            box-shadow: none;
+        }
+        .btn-folder.secondary:hover {
+            background: rgba(255,255,255,0.06);
+            box-shadow: none;
+        }
+        .load-hint {
+            max-width: 520px;
+            margin: 0;
+            color: #888;
+            font-size: 13px;
+            line-height: 1.6;
+            letter-spacing: 0;
+            text-align: center;
+            font-weight: 400;
+            text-transform: none;
+        }
+        .load-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .load-actions button {
+            flex: 1;
+            height: 36px;
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #2a2a2a;
+            color: #eee;
+            border: 1px solid #555;
+        }
+        .load-actions button:hover { background: #3a3a3a; }
 
         #export-modal {
             display: none;
