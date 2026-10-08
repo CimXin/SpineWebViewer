@@ -270,10 +270,8 @@ function render37() {
         shader.unbind();
 
         if(!isExporting) {
-            if(window.debugRenderer && window.viewerConfig.showBones) {
+            if(window.debugRenderer) {
                 window.debugRenderer.drawBones(skeleton, camX, camY, camZoom, h);
-            } else if(window.debugRenderer) {
-                window.debugRenderer.drawBones(null, 0,0,1,0); 
             }
         }
     }

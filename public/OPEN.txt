@@ -1,4 +1,4 @@
-Spine Web Viewer  v1.0.3
+Spine Web Viewer  v1.0.4
 ========================
 
 下载这个压缩包、解压，然后双击启动脚本即可。不要直接双击 index.html。

@@ -6,9 +6,9 @@
 
 ## 下载后直接使用
 
-发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.3/SpineWebViewer-v1.0.3.zip>
+发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.4/SpineWebViewer-v1.0.4.zip>
 
-1. 下载 `SpineWebViewer-v1.0.3.zip` 并解压。
+1. 下载 `SpineWebViewer-v1.0.4.zip` 并解压。
 2. 不要直接双击 `index.html`。Chrome 等浏览器会拦截 `file://` 下的模块脚本，导出功能也只允许在 localhost 里选择保存目录。
 3. 用解压目录里的启动脚本打开（脚本会在本机起一个页面并自动打开浏览器）：
    - Windows：双击 `Start-Windows.bat`。有 Python 就用 Python；没有则用系统自带的 PowerShell，不用再安装 Node。
@@ -25,7 +25,7 @@ npm install
 npm run package
 ```
 
-`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.3.zip`。
+`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.4.zip`。
 
 ## 环境
 
@@ -71,7 +71,7 @@ npx serve dist
 5. 列表可以搜索，点星标收藏。点某一项开始预览。
 6. 版本会从 JSON 的 `skeleton.spine` 或二进制文件头里自动判断。右下角也可以手动指定 3.6、3.7、3.8、4.0、4.1、4.2。
 
-播放：底部按钮或空格键暂停 / 继续，拖动时间轴，切换倍速和帧率。画面上按住左键平移，滚轮缩放，**归位** 恢复镜头。
+播放：底部按钮或空格键暂停 / 继续，拖动时间轴，切换倍速和帧率。画面上按住左键平移，滚轮缩放，**归位** 恢复镜头。预览时默认画出骨架原点的坐标轴（红 X、绿 Y），右侧动画面板里的 **原点坐标轴** 可以关掉。
 
 导出 PNG 序列帧或 GIF 时，浏览器会要求选择一个保存目录（File System Access API）。导出过程中保持这个标签页在前台。
 

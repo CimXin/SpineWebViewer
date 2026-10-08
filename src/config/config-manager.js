@@ -11,6 +11,7 @@ window.saveConfig = function() {
         bgColor: document.getElementById('bg-color').value,
         bgType: window.viewerConfig.bgType || 'color', // 记录是纯色还是棋盘格
         showBones: document.getElementById('chk-bones').checked,
+        showOrigin: document.getElementById('chk-origin').checked,
         boneColor: document.getElementById('bone-color').value,
         boneScale: document.getElementById('bone-scale').value,
         speed: document.getElementById('speed-select').value,
@@ -59,6 +60,10 @@ window.loadConfig = function() {
         if (config.showBones !== undefined) {
             document.getElementById('chk-bones').checked = config.showBones;
             if(window.viewerConfig) window.viewerConfig.showBones = config.showBones;
+        }
+        if (config.showOrigin !== undefined) {
+            document.getElementById('chk-origin').checked = config.showOrigin;
+            if(window.viewerConfig) window.viewerConfig.showOrigin = config.showOrigin;
         }
         if (config.boneColor) {
             document.getElementById('bone-color').value = config.boneColor;

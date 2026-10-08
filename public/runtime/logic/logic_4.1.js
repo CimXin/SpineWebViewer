@@ -280,18 +280,14 @@ function render41() {
         renderer.end();
 
         // === 绘制骨骼调试线 (导出时不绘制) ===
-        if(!isExporting) {
-            if(window.debugRenderer && window.viewerConfig.showBones) {
-                window.debugRenderer.drawBones(
-                    skeleton, 
-                    renderer.camera.position.x, 
-                    renderer.camera.position.y, 
-                    renderer.camera.zoom, 
-                    h
-                );
-            } else if(window.debugRenderer) {
-                window.debugRenderer.drawBones(null, 0,0,1,0); 
-            }
+        if(!isExporting && window.debugRenderer) {
+            window.debugRenderer.drawBones(
+                skeleton,
+                renderer.camera.position.x,
+                renderer.camera.position.y,
+                renderer.camera.zoom,
+                h
+            );
         }
     }
 }

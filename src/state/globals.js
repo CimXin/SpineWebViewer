@@ -48,6 +48,7 @@ window.log = function(msg) { document.getElementById('log').innerText = msg; }
 window.viewerConfig = { 
     bgColor: [0.2, 0.2, 0.2, 0.0],
     showBones: false,
+    showOrigin: true,
     boneColor: '#00ff00',
     boneScale: 1.0,
     speed: 1.0,
