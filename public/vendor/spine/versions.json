@@ -1,0 +1,54 @@
+{
+  "updated": "2026-10-08",
+  "upstream": "https://github.com/EsotericSoftware/spine-runtimes",
+  "runtimes": [
+    {
+      "version": "3.6",
+      "package": "EsotericSoftware/spine-runtimes@3.6.53",
+      "url": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.6.53/spine-ts/build/spine-webgl.js",
+      "licenseUrl": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.6.53/spine-ts/LICENSE",
+      "bytes": 343335,
+      "notes": "Git tag 3.6.53, path spine-ts/build/spine-webgl.js. Exposes global `spine`."
+    },
+    {
+      "version": "3.7",
+      "package": "EsotericSoftware/spine-runtimes@3.7.94",
+      "url": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.7.94/spine-ts/build/spine-webgl.js",
+      "licenseUrl": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.7.94/spine-ts/LICENSE",
+      "bytes": 368744,
+      "notes": "Git tag 3.7.94, path spine-ts/build/spine-webgl.js. Exposes global `spine`."
+    },
+    {
+      "version": "3.8",
+      "package": "EsotericSoftware/spine-runtimes@3.8.95",
+      "url": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.8.95/spine-ts/build/spine-webgl.js",
+      "licenseUrl": "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/3.8.95/spine-ts/LICENSE",
+      "bytes": 420306,
+      "notes": "Git tag 3.8.95, path spine-ts/build/spine-webgl.js. Exposes global `spine`."
+    },
+    {
+      "version": "4.0",
+      "package": "@esotericsoftware/spine-webgl@4.0.31",
+      "url": "https://unpkg.com/@esotericsoftware/spine-webgl@4.0.31/dist/iife/spine-webgl.js",
+      "licenseUrl": "https://unpkg.com/@esotericsoftware/spine-webgl@4.0.31/LICENSE",
+      "bytes": 435541,
+      "notes": "npm IIFE bundle dist/iife/spine-webgl.js. Exposes global `spine`."
+    },
+    {
+      "version": "4.1",
+      "package": "@esotericsoftware/spine-webgl@4.1.55",
+      "url": "https://unpkg.com/@esotericsoftware/spine-webgl@4.1.55/dist/iife/spine-webgl.js",
+      "licenseUrl": "https://unpkg.com/@esotericsoftware/spine-webgl@4.1.55/LICENSE",
+      "bytes": 510655,
+      "notes": "npm IIFE bundle dist/iife/spine-webgl.js. Exposes global `spine`."
+    },
+    {
+      "version": "4.2",
+      "package": "@esotericsoftware/spine-webgl@4.2.119",
+      "url": "https://unpkg.com/@esotericsoftware/spine-webgl@4.2.119/dist/iife/spine-webgl.js",
+      "licenseUrl": "https://unpkg.com/@esotericsoftware/spine-webgl@4.2.119/LICENSE",
+      "bytes": 554504,
+      "notes": "npm IIFE bundle dist/iife/spine-webgl.js. Exposes global `spine`."
+    }
+  ]
+}
