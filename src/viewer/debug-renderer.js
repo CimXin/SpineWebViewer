@@ -40,10 +40,13 @@ window.debugRenderer = {
     drawBones: function(skeleton, camX, camY, zoom, canvasHeight) {
         const ctx = window.viewerConfig.debugCtx;
         const c = window.viewerConfig.debugCanvas;
-        if(!ctx || !c || !window.viewerConfig.showBones || !skeleton) {
-            if(ctx) ctx.clearRect(0, 0, c.width, c.height);
+        const showBones = !!(window.viewerConfig.showBones && skeleton);
+        const showOrigin = window.viewerConfig.showOrigin !== false && !!skeleton;
+        if(!ctx || !c || (!showBones && !showOrigin)) {
+            if(ctx && c) ctx.clearRect(0, 0, c.width, c.height);
             return;
         }
+        if(!zoom || !Number.isFinite(zoom)) zoom = 1;
 
         ctx.clearRect(0, 0, c.width, c.height);
         ctx.save();
@@ -53,6 +56,14 @@ window.debugRenderer = {
         ctx.scale(zoom, zoom); 
         ctx.scale(1, -1); 
         ctx.translate(-camX, -camY);
+
+        if (showOrigin) this.drawOriginAxes(ctx, skeleton, zoom);
+
+        if (!showBones) {
+            ctx.restore();
+            this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
+            return;
+        }
 
         // === 智能过滤：仅显示当前可见附件关联的骨骼 ===
         const activeBones = new Set();
@@ -156,6 +167,67 @@ window.debugRenderer = {
                 ctx.fill();
             }
         }
+        ctx.restore();
+        if (showOrigin) this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
+    },
+    drawOriginAxes: function(ctx, skeleton, zoom) {
+        const ox = skeleton.x || 0;
+        const oy = skeleton.y || 0;
+        const span = 200000;
+        const z = zoom || 1;
+        const strokeLine = (x1, y1, x2, y2, color) => {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineWidth = 3 / z;
+            ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+            ctx.stroke();
+            ctx.lineWidth = 1.6 / z;
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        };
+        strokeLine(ox - span, oy, ox + span, oy, '#ff4d6a');
+        strokeLine(ox, oy - span, ox, oy + span, '#3dde7a');
+
+        const wing = 9 / z;
+        this.fillArrow(ctx, ox + 42 / z, oy, 1, 0, wing, '#ff4d6a');
+        this.fillArrow(ctx, ox, oy + 42 / z, 0, 1, wing, '#3dde7a');
+
+        ctx.beginPath();
+        ctx.arc(ox, oy, 5 / z, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 1.5 / z;
+        ctx.strokeStyle = '#111111';
+        ctx.stroke();
+    },
+    fillArrow: function(ctx, tipX, tipY, dx, dy, wing, color) {
+        const px = -dy;
+        const py = dx;
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(tipX - dx * wing * 1.7 + px * wing * 0.75, tipY - dy * wing * 1.7 + py * wing * 0.75);
+        ctx.lineTo(tipX - dx * wing * 1.7 - px * wing * 0.75, tipY - dy * wing * 1.7 - py * wing * 0.75);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    },
+    drawOriginLabels: function(ctx, c, skeleton, camX, camY, zoom) {
+        const ox = skeleton.x || 0;
+        const oy = skeleton.y || 0;
+        const sx = c.width / 2 + (ox - camX) * zoom;
+        const sy = c.height / 2 - (oy - camY) * zoom;
+        ctx.save();
+        ctx.font = 'bold 13px sans-serif';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+        ctx.lineJoin = 'round';
+        ctx.strokeText('X', sx + 48, sy + 4);
+        ctx.fillStyle = '#ff4d6a';
+        ctx.fillText('X', sx + 48, sy + 4);
+        ctx.strokeText('Y', sx + 4, sy - 40);
+        ctx.fillStyle = '#3dde7a';
+        ctx.fillText('Y', sx + 4, sy - 40);
         ctx.restore();
     }
 };
