@@ -1,0 +1,25 @@
+Spine Web Viewer  v1.0.0
+========================
+
+下载这个压缩包、解压，然后双击启动脚本即可。不要直接双击 index.html。
+浏览器不允许用 file:// 打开带模块脚本的页面，启动脚本会在本机临时开一个页面服务并自动打开浏览器。
+
+Windows
+  双击 Start-Windows.bat
+  若系统里有 Python，会用 Python；没有的话会用系统自带的 PowerShell，不需要再安装别的东西。
+
+macOS
+  双击 Start-Mac.command
+  若系统提示无法打开，请在文件上右键，选择“打开”。
+  需要系统自带的 Python 3。
+
+Linux
+  在解压目录执行:
+    bash Start-Linux.sh
+  或:
+    python3 serve.py
+
+浏览器打开后，点击“打开动画文件夹”，选择包含 .json 或 .skel、.atlas 和贴图的整个文件夹。
+关掉启动脚本打开的那个黑色窗口，服务就会停止。
+
+导出 PNG / GIF 需要这个本地页面（浏览器只允许在 localhost 里选择保存目录）。

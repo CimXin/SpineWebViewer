@@ -4,10 +4,34 @@
 
 运行时不是把旧压缩包里的 `spine-webgl-*.js` 原样塞进仓库，而是按版本从 Esoteric Software 的官方发布拉取。版本适配器（`public/runtime/logic/`）仍沿用参考播放器里针对各版本 WebGL API 的加载与渲染代码。
 
+## 下载后直接使用
+
+发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.0/SpineWebViewer-v1.0.0.zip>
+
+1. 下载 `SpineWebViewer-v1.0.0.zip` 并解压。
+2. 不要直接双击 `index.html`。Chrome 等浏览器会拦截 `file://` 下的模块脚本，导出功能也只允许在 localhost 里选择保存目录。
+3. 用解压目录里的启动脚本打开（脚本会在本机起一个页面并自动打开浏览器）：
+   - Windows：双击 `Start-Windows.bat`。有 Python 就用 Python；没有则用系统自带的 PowerShell，不用再安装 Node。
+   - macOS：双击 `Start-Mac.command`（若被拦截，右键该文件再选“打开”）。
+   - Linux：在解压目录执行 `bash Start-Linux.sh`。
+4. 在页面里点 **打开动画文件夹**，选中包含 `.json` 或 `.skel`、`.atlas` 和贴图的整个文件夹。
+
+关掉启动脚本那个窗口即停止服务。压缩包里的 `OPEN.txt` 是同样的说明。
+
+自己从源码打这个压缩包：
+
+```bash
+npm install
+npm run package
+```
+
+`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.0.zip`。
+
 ## 环境
 
-- Node.js 18 或更高
-- 现代浏览器（Chrome / Edge）。文件夹选择和导出目录使用浏览器文件 API，需要通过本地开发服务器或 HTTPS 打开，不要直接双击 `index.html`。
+从源码开发时需要 Node.js 18 或更高。只使用上面的发布压缩包时不需要安装 Node。
+
+请用 Chrome 或 Edge。文件夹选择和导出目录使用浏览器文件 API，必须通过启动脚本、`npm run dev` 或其它本地静态服务打开。
 
 ## 安装与运行
 
@@ -25,7 +49,7 @@ npm run build
 npm run preview
 ```
 
-`dist/` 是可部署的静态站点。用任意静态服务器托管即可，例如：
+`dist/` 是可部署的静态站点，资源使用相对路径，并带有 `Start-Windows.bat`、`Start-Mac.command`、`Start-Linux.sh`。用任意静态服务器托管即可，例如：
 
 ```bash
 npx vite preview
