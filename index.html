@@ -6,7 +6,7 @@
     <title>Spine 万能查看器</title>
     <style>
         html, body { margin: 0; background: #111; }
-        #ui, #controls, #file-panel, #effect-panel, #export-modal, #donate-modal, #sheet-modal, #zoom-modal { display: none; }
+        #ui, #controls, #file-panel, #effect-panel, #export-modal, #sheet-modal { display: none; }
     </style>
     <script src="%BASE_URL%vendor/gif/gif.js"></script>
 </head>
@@ -424,11 +424,6 @@
 
 </div>
 
-<!-- 左下角独立打赏按钮 -->
-<button onclick="showDonate()" id="btn-donate-fixed" title="支持作者">
-    ☕
-</button>
-
 <div id="export-modal">
     <h2 style="color:white;">正在导出序列帧...</h2>
     <div id="export-progress-bar"><div id="export-progress-fill"></div></div>
@@ -522,46 +517,6 @@
         </div>
     </div>
 
-    <!-- 打赏弹窗 -->
-    <div id="donate-modal">
-        <div class="donate-content" style="background: linear-gradient(145deg, #2a2a2a, #222); border: 1px solid #555;">
-            <button class="donate-close" onclick="document.getElementById('donate-modal').style.display='none'" style="font-size:28px;">×</button>
-            
-            <h2 style="color: #ff9a9e; margin-top: 5px; margin-bottom: 20px; font-size: 26px; text-shadow: 0 2px 10px rgba(255,154,158,0.3);">
-                ☕ 感谢您的支持 ☕
-            </h2>
-            
-            <div style="font-size: 16px; line-height: 1.8; color: #eee; margin-bottom: 25px; font-weight: 500;">
-                如果您觉得还不错，<br>
-                不妨请我喝杯咖啡 ☕<br>
-                <span style="color: #ffc371; font-size: 15px;">我会写得更有精神一点 😄</span>
-            </div>
-            
-            <div class="qr-container">
-                <div class="qr-box">
-                    <div id="qr-wx" class="qr-img qr-empty">未配置</div>
-                    <div class="qr-label" style="color:#09bb07">WeChat (微信)</div>
-                </div>
-                <div class="qr-box">
-                    <div id="qr-zfb" class="qr-img qr-empty">未配置</div>
-                    <div class="qr-label" style="color:#108ee9">Alipay (支付宝)</div>
-                </div>
-            </div>
-            
-            <div style="font-size: 12px; color: #888; margin-top: 15px; line-height: 1.6;">
-                本仓库未附带收款码。如需展示，把图片放到
-                <code>public/vendor/donate/</code> 并在页面里换成对应地址。
-            </div>
-        </div>
-    </div>
-
-    <!-- 图片放大灯箱 -->
-    <div id="zoom-modal" onclick="this.style.display='none'">
-        <img id="zoom-img" src="">
-        <div style="position:absolute; bottom:30px; color:#aaa; font-size:14px; background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px;">
-            点击任意处关闭
-        </div>
-    </div>
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -1,18 +1,3 @@
-function showDonate() {
-    const modal = document.getElementById('donate-modal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function showBigQR(src) {
-    // 如果是占位符或者空链接，不放大
-    if (!src || src.length < 100) return;
-    
-    const zoomModal = document.getElementById('zoom-modal');
-    const zoomImg = document.getElementById('zoom-img');
-    zoomImg.src = src;
-    zoomModal.style.display = 'flex';
-}
-
 function toggleSection(header) {
     const group = header.parentElement;
     const content = group.querySelector('.ui-content');
