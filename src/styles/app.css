@@ -545,8 +545,9 @@ input[type=checkbox] {
 .origin-overlay {
     position: fixed;
     top: 16px;
-    left: 338px;
+    left: 370px;
     z-index: 40;
+    box-sizing: border-box;
     display: none;
     align-items: center;
     justify-content: center;
