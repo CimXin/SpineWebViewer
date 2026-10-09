@@ -9,7 +9,7 @@
     --line: #111111;
     --stage: #171717;
     --stage-2: #101010;
-    --rose: #f3a8b8;
+    --field: #ABBABA;
     --teal: #1fb5a8;
     --mark: 12px;
     --font-display: "Noto Sans Display", Inter, "Liberation Sans", "WenQuanYi Micro Hei", sans-serif;
@@ -290,7 +290,7 @@ input[type=checkbox] {
     background: #fff;
 }
 .file-item:last-child { border-bottom: none; }
-.file-item:hover { background: #f3e6ea; }
+.file-item:hover { background: var(--field); }
 .file-item.active {
     background: var(--ink);
     color: var(--paper);
@@ -532,8 +532,8 @@ input[type=checkbox] {
 #ui .bone-tree-node:hover { background: rgba(255,255,255,0.06) !important; color: #fff !important; }
 #ui .bone-tree-node.active {
     background: transparent !important;
-    color: var(--rose) !important;
-    box-shadow: inset 2px 0 0 var(--rose);
+    color: var(--field) !important;
+    box-shadow: inset 2px 0 0 var(--field);
 }
 
 /* Effect manager: light window chrome */
@@ -744,7 +744,7 @@ body:has(#drop-zone[style*="display:none"]) #log {
 #export-progress-fill {
     width: 0;
     height: 100%;
-    background: var(--rose);
+    background: var(--field);
     border-radius: 0;
 }
 #export-status { color: #ddd !important; font-family: var(--font-mono); }
@@ -784,7 +784,7 @@ body:has(#drop-zone[style*="display:none"]) #log {
     color: var(--ink) !important;
 }
 
-/* Splash: white field, rose band, black button */
+/* Splash: white field, slate band, black button */
 #drop-zone {
     position: absolute;
     inset: 0;
@@ -846,7 +846,7 @@ body:has(#drop-zone[style*="display:none"]) #log {
     align-items: center;
     justify-content: center;
     gap: 18px;
-    background-color: var(--rose);
+    background-color: var(--field);
     color: var(--ink);
     padding: 48px 24px 64px;
     pointer-events: none;

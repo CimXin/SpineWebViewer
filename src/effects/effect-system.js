@@ -264,7 +264,7 @@ window.effectSystem = {
             // 1. 顶部行 (缩略图 + 名字 + 按钮)
             const row = document.createElement('div');
             row.style.cssText = "padding:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;";
-            row.onmouseover = () => row.style.background = "#f3e6ea";
+            row.onmouseover = () => row.style.background = "#ABBABA";
             row.onmouseout = () => row.style.background = "transparent";
             
             // 缩略图
