@@ -765,6 +765,25 @@ body:has(#ui[style*="display:block"]) .origin-overlay {
     border: 1px solid var(--ink) !important;
     font-weight: 700;
 }
+.transport-cluster {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+.btn-step {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    flex: 0 0 32px;
+    background: var(--paper);
+    color: var(--ink);
+}
+.btn-step svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
 #timeline { flex: 1; height: 1px; background: var(--ink); border-radius: 0; }
 #timeline::-webkit-slider-thumb {
     width: 10px; height: 10px;

@@ -458,7 +458,15 @@
 
 <div id="controls" class="panel marks">
     <div class="play-row">
-        <button id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
+        <div class="transport-cluster">
+            <button type="button" id="btn-step-back" class="btn-step" onclick="animControl.step(-1)" title="逐帧后退" aria-label="逐帧后退" data-i18n-title="play.stepBack" data-i18n-aria="play.stepBack">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1 2h2v12H1z"/><path fill="currentColor" d="M14 3L5 8l9 5z"/></svg>
+            </button>
+            <button type="button" id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
+            <button type="button" id="btn-step-fwd" class="btn-step" onclick="animControl.step(1)" title="逐帧前进" aria-label="逐帧前进" data-i18n-title="play.stepFwd" data-i18n-aria="play.stepFwd">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M13 2h2v12h-2z"/><path fill="currentColor" d="M2 3l9 5-9 5z"/></svg>
+            </button>
+        </div>
         <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
         <div style="display:flex; align-items:center; gap:5px; margin-left:10px;">
             <select id="time-unit-select" style="width:40px;">
