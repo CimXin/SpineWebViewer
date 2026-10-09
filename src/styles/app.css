@@ -355,6 +355,23 @@
     }
     
     /* 折叠状态控制 */
+    .origin-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: #ddd;
+        cursor: pointer;
+    }
+    .origin-hint {
+        margin: 0;
+        color: #999;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
     .ui-group.open .ui-content { display: block; }
     .ui-group.open .ui-arrow { transform: rotate(90deg); }
     .ui-group.open .ui-header { background: #2a2a2a; border-bottom-color: #444; }
