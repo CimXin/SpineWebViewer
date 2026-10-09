@@ -1,5 +1,7 @@
 window.loadSpineGroup = async function(files, forceVersion = null) {
     window.currentSpineFiles = files;
+    const ts = Date.now();
+    window.viewerConfig.currentLoadId = ts;
 
     if (window.rendererRequestId) {
         cancelAnimationFrame(window.rendererRequestId);
@@ -116,9 +118,6 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         if(window.refreshBoneTree) window.refreshBoneTree();
     };
 
-    const ts = Date.now();
-    window.viewerConfig.currentLoadId = ts;
-
     // Official runtime + version adapter. See public/vendor/spine/versions.json.
     const runtimeKey = version.startsWith("3.6") ? "3.6"
         : version.startsWith("3.7") ? "3.7"
@@ -170,7 +169,16 @@ function ensureSpineRuntime(runtimeKey) {
     }
     if (!spineRuntimePromises[runtimeKey]) {
         const base = window.__ASSET_BASE__ || "/";
-        spineRuntimePromises[runtimeKey] = loadClassicScript(`${base}vendor/spine/${runtimeKey}/spine-webgl.js`).then(() => {
+        const url = `${base}vendor/spine/${runtimeKey}/spine-webgl.js`;
+        spineRuntimePromises[runtimeKey] = fetch(url).then((res) => {
+            if (!res.ok) throw new Error(url);
+            return res.text();
+        }).then((code) => {
+            // 3.x/4.1 会写进已经存在的全局 spine。先清掉，避免和另一版本的 class 混在同一个对象上。
+            window.spine = undefined;
+            const script = document.createElement("script");
+            script.textContent = code;
+            document.head.appendChild(script);
             window.__spineRuntimes[runtimeKey] = window.spine;
         });
     }

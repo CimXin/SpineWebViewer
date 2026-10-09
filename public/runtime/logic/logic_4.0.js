@@ -59,11 +59,13 @@ async function loadFiles40(files) {
 
     try {
         const atlasText = await readFileAsText(map.atlas);
-        const imgUrl = await readFileAsDataURL(map.png);
-        
+        const imgUrl = URL.createObjectURL(map.png);
+
         const img = new Image();
         img.onload = async () => {
+            URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
+            if(!gl || gl.isContextLost()) return;
             
             // 根据用户设置决定是否让 WebGL 自动预乘 Alpha
             const unpack = window.viewerConfig.unpackEnabled || false;
