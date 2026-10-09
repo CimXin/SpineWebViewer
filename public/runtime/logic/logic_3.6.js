@@ -61,7 +61,11 @@ async function loadFiles36(files) {
         img.onload = async () => {
             URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
-            if(!gl || gl.isContextLost()) return;
+            if(!gl || gl.isContextLost()) {
+                if (window.log) window.log("加载失败: WebGL 上下文已丢失");
+                return;
+            }
+            try {
             
             // 根据用户设置决定是否让 WebGL 自动预乘 Alpha
             const unpack = window.viewerConfig.unpackEnabled || false;
@@ -86,10 +90,12 @@ async function loadFiles36(files) {
                     } else {
                         // 最终确认：官方库不支持
                         alert("❌ 加载失败：\n\nSpine 官方的 JavaScript 运行时直到 3.8 版本才加入二进制 (.skel) 支持。\n3.6 版本的官方 Web 库仅支持 JSON 格式。\n\n请使用 Spine 编辑器将动画重新导出为 JSON 格式即可解决。");
+                        if (window.log) window.log("加载失败: 3.6 不支持二进制，请改用 JSON");
                         return;
                     }
                 } catch (binError) {
                     alert("加载 3.6 二进制异常: " + binError + "\n请使用 JSON 格式。");
+                    if (window.log) window.log("加载失败: " + binError);
                     return;
                 }
             } else {
@@ -108,13 +114,30 @@ async function loadFiles36(files) {
             
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render36();
+                const ver = skeletonData && skeletonData.version;
+                if (window.log) window.log(ver ? `版本: ${ver}` : "加载完成");
+            } catch (e) {
+                console.error(e);
+                const msg = "加载失败: " + (e && e.message ? e.message : e);
+                if (window.log) window.log(msg);
+                alert(msg);
+            }
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(imgUrl);
+            if (window.viewerConfig.currentLoadId !== myLoadId) return;
+            const msg = "贴图解码失败";
+            if (window.log) window.log(msg);
+            alert(msg);
         };
         if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {
-        alert("3.6 加载错误: " + e);
         console.error(e);
+        const msg = "3.6 加载错误: " + (e && e.message ? e.message : e);
+        if (window.log) window.log(msg);
+        alert(msg);
     }
 }
 
