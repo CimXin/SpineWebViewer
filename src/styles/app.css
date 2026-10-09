@@ -504,6 +504,12 @@
             text-transform: uppercase;
         }
 
+        #web-input, #native-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
         .btn-folder {
             margin-top: 20px; /* 增加上方间距 */
             padding: 18px 50px; font-size: 20px; 
@@ -513,7 +519,22 @@
             pointer-events: auto;
             box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            letter-spacing: 2px;
+            letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: fit-content;
+            line-height: 1;
+            text-align: center;
+        }
+        .btn-folder-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.15em;
+            line-height: 1;
+            flex: 0 0 auto;
         }
         .btn-folder:hover { 
             transform: translateY(-2px) scale(1.02); 
@@ -521,17 +542,6 @@
         }
         .btn-folder:active {
             transform: translateY(1px) scale(0.98);
-        }
-        .load-hint {
-            max-width: 520px;
-            margin: 0;
-            color: #888;
-            font-size: 13px;
-            line-height: 1.6;
-            letter-spacing: 0;
-            text-align: center;
-            font-weight: 400;
-            text-transform: none;
         }
         .load-actions {
             display: flex;
