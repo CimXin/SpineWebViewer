@@ -14,9 +14,9 @@
 
 ## 下载后直接使用
 
-发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.10/SpineWebViewer-v1.0.10.zip>
+发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.11/SpineWebViewer-v1.0.11.zip>
 
-1. 下载 `SpineWebViewer-v1.0.10.zip` 并解压。
+1. 下载 `SpineWebViewer-v1.0.11.zip` 并解压。
 2. 不要直接双击 `index.html`。Chrome 等浏览器会拦截 `file://` 下的模块脚本，导出功能也只允许在 localhost 里选择保存目录。
 3. 用解压目录里的启动脚本打开（脚本会在本机起一个页面并自动打开浏览器）：
    - Windows：双击 `Start-Windows.bat`。有 Python 就用 Python；没有则用系统自带的 PowerShell，不用再安装 Node。
@@ -33,7 +33,7 @@ npm install
 npm run package
 ```
 
-`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.10.zip`。
+`npm run build` 会生成相对路径的 `dist/`（含 Spine 运行时和启动脚本）。`npm run package` 再把它打成 `release/SpineWebViewer-v1.0.11.zip`。
 
 ## 环境
 
