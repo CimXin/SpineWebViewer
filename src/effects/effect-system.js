@@ -632,7 +632,7 @@ window.effectSystem = {
                 pValInput.type = "text"; 
                 pValInput.value = effObj.maxLoop === -1 ? 1 : effObj.maxLoop;
                 pValInput.title = "播放次数 (Play Count)"; 
-                pValInput.style.cssText = "width:30px; height:20px; background:transparent; border:none; color:#fff; font-family:monospace; font-size:12px; font-weight:bold; text-align:center; padding:0; outline:none;";
+                pValInput.style.cssText = "width:30px; height:20px; background:#fff; border:1px solid #111; color:#111; font-family:monospace; font-size:12px; font-weight:bold; text-align:center; padding:0; outline:none;";
                 
                 if(effObj.maxLoop === -1) pValInput.style.opacity = "0.5";
 

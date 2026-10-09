@@ -28,11 +28,10 @@ window.animControl = {
             const curFrame = Math.floor((current % total) * fps);
             const totalFrame = Math.floor(total * fps);
             txt.innerText = `${curFrame} / ${totalFrame}`;
-            txt.style.color = '#00e5ff'; 
         } else {
             txt.innerText = `${(current % total).toFixed(2)} / ${total.toFixed(2)}`;
-            txt.style.color = '#ffffff'; 
         }
+        txt.style.color = '#111111';
     },
     
     // 强制刷新（当FPS改变时调用）

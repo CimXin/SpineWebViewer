@@ -451,12 +451,25 @@ input[type=checkbox] {
 
 #ui label, #ui .control-row label { color: #e8e8e6 !important; }
 #ui select,
+#ui option,
 #ui input[type="text"],
 #ui input[type="number"] {
-    background: transparent !important;
+    background: #1a1a1a !important;
     color: #f4f4f2 !important;
     border: 1px solid rgba(255,255,255,0.45) !important;
     border-radius: 0 !important;
+    color-scheme: dark;
+}
+#event-log {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #e6e6e4;
+    max-height: 150px;
+    overflow-y: auto;
+}
+#ui .event-log-empty {
+    color: #e6e6e4 !important;
+    font-style: italic;
 }
 #ui button {
     background: transparent !important;
@@ -533,10 +546,15 @@ input[type=checkbox] {
 }
 #effect-panel-header {
     background: #e6e6e2 !important;
-    color: var(--ink) !important;
+    color: #111 !important;
     border-bottom: 1px solid var(--ink) !important;
     font-family: var(--font-mono);
     font-size: 12px;
+}
+#effect-panel-header,
+#effect-panel-header .effect-title,
+#effect-panel-header span {
+    color: #111 !important;
 }
 #effect-panel-header button {
     background: transparent !important;
@@ -568,7 +586,13 @@ input[type=checkbox] {
     background: #fff !important;
     border: 1px solid var(--ink) !important;
     border-radius: 0 !important;
-    color: var(--ink);
+    color: #111;
+}
+#effect-panel [style*="color:#888"],
+#effect-panel [style*="color:#666"],
+#effect-panel [style*="color:#555"],
+#effect-panel [style*="color:#aaa"] {
+    color: #333 !important;
 }
 #effect-resize-handle {
     background: linear-gradient(135deg, transparent 50%, #111 50%) !important;
@@ -622,7 +646,30 @@ input[type=checkbox] {
     background: var(--ink);
     border-radius: 0;
 }
-#time-text { font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
+#time-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #111 !important;
+}
+#time-unit-select,
+#controls select,
+#controls option,
+#file-panel select,
+#file-panel option,
+#effect-panel select,
+#effect-panel option,
+#sheet-modal select,
+#sheet-modal option,
+#sheet-modal input,
+#file-panel input[type="text"],
+#file-panel input[type="number"],
+#effect-panel input[type="text"],
+#effect-panel input[type="number"] {
+    color: #111 !important;
+    background-color: #fff !important;
+    color-scheme: light;
+}
+#time-unit-select { min-width: 46px; }
 .play-row { display: flex; align-items: center; gap: 12px; width: 100%; }
 .control-group { display: flex; align-items: center; gap: 6px; }
 .control-group label {

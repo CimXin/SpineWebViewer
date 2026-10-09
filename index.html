@@ -70,7 +70,7 @@
         
         <!-- 顶部标题栏 (添加 ID 用于拖动句柄) -->
         <div id="effect-panel-header" style="background:rgba(0,0,0,0.5); padding:10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; cursor: move; user-select: none;">
-            <div style="font-weight:bold; color:white; display:flex; align-items:center; gap:10px;">
+            <div class="effect-title" style="font-weight:bold; display:flex; align-items:center; gap:10px;">
                 <span>⚡ 特效管理器</span>
             </div>
             <button onclick="document.getElementById('effect-panel').style.display='none'" style="background:none; color:#aaa; font-size:18px; padding:0; cursor: pointer;">×</button>
@@ -326,8 +326,8 @@
             </div>
             
             <!-- 日志区 -->
-            <div id="event-log" style="font-family: monospace; font-size: 11px; color: #aaa; max-height: 150px; overflow-y: auto;">
-                <div style="color:#666; font-style:italic;">等待事件触发...</div>
+            <div id="event-log">
+                <div class="event-log-empty">等待事件触发...</div>
             </div>
         </div>
     </div>
