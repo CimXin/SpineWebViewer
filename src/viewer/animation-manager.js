@@ -30,7 +30,7 @@ window.addTrack = function() {
     lbl.innerText = `T${trackIndex}`;
     lbl.style.fontSize = '11px';
     lbl.style.fontWeight = 'bold';
-    lbl.style.color = '#00e5ff';
+    lbl.style.color = '#f4f4f2';
     lbl.style.minWidth = '18px';
     
     const sel = document.createElement('select');
