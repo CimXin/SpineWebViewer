@@ -17,6 +17,7 @@ window.saveConfig = function() {
         speed: document.getElementById('speed-select').value,
         fps: document.getElementById('fps-select').value,
         pma: document.getElementById('chk-pma').checked,
+        pmaUserSet: !!(window.viewerConfig && window.viewerConfig.pmaUserSet),
         unpack: document.getElementById('chk-unpack').checked,
         // 记录导出设置
         exportParams: {
@@ -85,9 +86,12 @@ window.loadConfig = function() {
         }
 
         // 恢复 PMA 和 Unpack
-        if (config.pma !== undefined) {
+        if (config.pmaUserSet && config.pma !== undefined) {
             document.getElementById('chk-pma').checked = config.pma;
-            if(window.viewerConfig) window.viewerConfig.pmaEnabled = config.pma;
+            if(window.viewerConfig) {
+                window.viewerConfig.pmaEnabled = config.pma;
+                window.viewerConfig.pmaUserSet = true;
+            }
         }
         if (config.unpack !== undefined) {
             document.getElementById('chk-unpack').checked = config.unpack;
@@ -135,6 +139,12 @@ document.addEventListener('visibilitychange', () => {
 
 function bootConfig() {
     if (window.debugRenderer) window.debugRenderer.init();
+    const pma = document.getElementById('chk-pma');
+    if (pma) {
+        pma.addEventListener('change', () => {
+            if (window.viewerConfig) window.viewerConfig.pmaUserSet = true;
+        });
+    }
     loadConfig();
 }
 
