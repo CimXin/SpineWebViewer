@@ -5,7 +5,7 @@ window.trackCounter = 1;
 
 window.addTrack = function() {
     if (!window.skeleton) {
-        alert("请先加载模型！");
+        alert(window.t("anim.needModel"));
         return;
     }
     
@@ -53,7 +53,8 @@ window.addTrack = function() {
     
     const alphaLabel = document.createElement('span');
     alphaLabel.innerText = "α";
-    alphaLabel.title = "混合权重 (Alpha)";
+    alphaLabel.title = window.t("track.alpha");
+    alphaLabel.setAttribute("data-i18n-title", "track.alpha");
     alphaLabel.style.fontSize = '10px';
     alphaLabel.style.color = '#aaa';
     
@@ -102,7 +103,8 @@ window.addTrack = function() {
     
     const btnDel = document.createElement('button');
     btnDel.innerHTML = '×';
-    btnDel.title = "移除轨道";
+    btnDel.title = window.t("track.remove");
+    btnDel.setAttribute("data-i18n-title", "track.remove");
     btnDel.style.width = '24px';
     btnDel.style.height = '24px';
     btnDel.style.background = '#d33';

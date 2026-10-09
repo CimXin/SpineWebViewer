@@ -66,7 +66,7 @@ async function loadFiles37(files) {
             URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
             if(!gl || gl.isContextLost()) {
-                if (window.log) window.log("加载失败: WebGL 上下文已丢失");
+                if (window.log) window.log(window.t("status.webglLost"), "status.webglLost");
                 return;
             }
             try {
@@ -86,8 +86,8 @@ async function loadFiles37(files) {
             // We will try JSON.
             
             if(map.type === 'binary') {
-                alert("Spine 3.7 WebGL 官方运行时不支持二进制 (.skel) 文件。\n请使用 JSON 格式导出，或转换为 JSON。");
-                if (window.log) window.log("加载失败: 3.7 不支持二进制，请改用 JSON");
+                alert(window.t("status.bin37"));
+                if (window.log) window.log(window.t("status.bin37log"), "status.bin37log");
                 return;
             } else {
                 const text = await readFileAsText(map.main);
@@ -106,28 +106,30 @@ async function loadFiles37(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render37();
                 const ver = skeletonData && skeletonData.version;
-                if (window.log) window.log(ver ? `版本: ${ver}` : "加载完成");
+                if (window.log) window.log(ver ? window.t("status.version", { v: ver }) : window.t("status.loaded"), ver ? "status.version" : "status.loaded", ver ? { v: ver } : undefined);
             } catch (e) {
                 console.error(e);
-                const msg = "加载失败: " + (e && e.message ? e.message : e);
-                if (window.log) window.log(msg);
+                const detail = e && e.message ? e.message : e;
+                const msg = window.t("status.loadFail", { msg: detail });
+                if (window.log) window.log(msg, "status.loadFail", { msg: String(detail) });
                 alert(msg);
             }
         };
         img.onerror = () => {
             URL.revokeObjectURL(imgUrl);
             if (window.viewerConfig.currentLoadId !== myLoadId) return;
-            const msg = "贴图解码失败";
-            if (window.log) window.log(msg);
+            const msg = window.t("status.textureFail");
+            if (window.log) window.log(msg, "status.textureFail");
             alert(msg);
         };
-        if (window.log) window.log('正在解码贴图…');
+        if (window.log) window.log(window.t("status.decoding"), "status.decoding");
         img.src = imgUrl;
 
     } catch(e) {
         console.error(e);
-        const msg = "3.7 加载错误: " + (e && e.message ? e.message : e);
-        if (window.log) window.log(msg);
+        const detail = e && e.message ? e.message : e;
+        const msg = window.t("status.err37", { msg: detail });
+        if (window.log) window.log(msg, "status.err37", { msg: String(detail) });
         alert(msg);
     }
 }

@@ -28,7 +28,7 @@ window.eventSystem = {
     attach: function(state) {
         console.log("Event System: Attaching listener to new state...");
         const box = document.getElementById('event-log');
-        if(box) box.innerHTML = '<div class="event-log-empty">等待事件触发...</div>';
+        if(box) box.innerHTML = '<div class="event-log-empty" data-i18n="event.waiting">' + window.t("event.waiting") + '</div>';
 
         if (state.addListener) {
             state.addListener({

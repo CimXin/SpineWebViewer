@@ -25,7 +25,8 @@ window.startSpine42 = async function(canvas, files) {
     if (!document.getElementById('btn-reset-phy')) {
         const btn = document.createElement('button');
         btn.id = 'btn-reset-phy';
-        btn.innerText = "💥 重置物理";
+        btn.innerText = window.t("physics.reset");
+        btn.setAttribute("data-i18n", "physics.reset");
         btn.className = 'btn-export'; // 复用导出按钮的样式
         btn.style.marginTop = '15px';
         btn.style.background = '#880000'; // 特殊颜色
@@ -37,10 +38,13 @@ window.startSpine42 = async function(canvas, files) {
     // 核心变量
     // =============================================================
     const ui = {
-        log: (msg, type) => {
-            console.log(msg);
-            const box = document.getElementById('log');
-            if(box) box.innerText = msg;
+        log: (msg, key, vars) => {
+            if (key === "err") key = undefined;
+            if (window.log) window.log(msg, key, vars);
+            else {
+                const box = document.getElementById('log');
+                if (box) box.innerText = msg;
+            }
         },
         updateSliders: () => {
             const sx = document.getElementById('posX');
@@ -75,7 +79,7 @@ window.startSpine42 = async function(canvas, files) {
 
         // 关键修复：添加 premultipliedAlpha: false，解决半透明黑边问题
         gl = canvas.getContext('webgl', { alpha: true, preserveDrawingBuffer: true, premultipliedAlpha: false });
-        if(!gl) throw "WebGL 不可用";
+        if(!gl) throw window.t("status.webglOff");
         
         // 确保 WebGL 不自动预乘 -> 修正：根据用户设置决定
         const unpack = window.viewerConfig.unpackEnabled || false;
@@ -98,7 +102,7 @@ window.startSpine42 = async function(canvas, files) {
         // 触发加载完成回调
         if(window.onSpineLoaded) window.onSpineLoaded();
         
-    } catch(e) { ui.log("初始化失败: " + e, 'err'); }
+    } catch(e) { ui.log(window.t("status.initFail", { msg: e }), "status.initFail", { msg: String(e) }); }
 
     // =============================================================
     // 输入绑定
@@ -161,7 +165,7 @@ window.startSpine42 = async function(canvas, files) {
                 if(sx) sx.value = 0;
                 if(sy) sy.value = -200;
                 
-                ui.log("视图已重置");
+                ui.log(window.t("status.viewReset"), "status.viewReset");
             }
         };
     }
@@ -169,7 +173,7 @@ window.startSpine42 = async function(canvas, files) {
     function resetPhysics() {
         if(skeleton && spine.Physics) {
             skeleton.updateWorldTransform(spine.Physics.reset);
-            ui.log("物理已重置");
+            ui.log(window.t("status.physicsReset"), "status.physicsReset");
         }
     }
 
@@ -186,7 +190,7 @@ window.startSpine42 = async function(canvas, files) {
         }
         
         if(!map.atlas || !map.png || !map.main) {
-            ui.log("文件缺失: 需要 .json/.skel + .atlas + .png", 'err');
+            ui.log(window.t("status.missingFiles"), "status.missingFiles");
             return;
         }
 
@@ -201,16 +205,16 @@ window.startSpine42 = async function(canvas, files) {
             img.onerror = () => {
                 URL.revokeObjectURL(imgBlob);
                 if(window.viewerConfig.currentLoadId !== myLoadId) return;
-                ui.log("贴图解码失败");
+                ui.log(window.t("status.textureFail"), "status.textureFail");
             };
-            ui.log("正在解码贴图…");
+            ui.log(window.t("status.decoding"), "status.decoding");
             img.src = imgBlob;
-        } catch(e) { ui.log(e, 'err'); }
+        } catch(e) { ui.log(window.t("status.loadFail", { msg: e }), "status.loadFail", { msg: String(e) }); }
     }
 
     async function processSpine(map, img) {
         try {
-            ui.log("正在加载 (Spine 4.2)...");
+            ui.log(window.t("status.loading42"), "status.loading42");
             const atlasText = await readFile(map.atlas, 'text');
             
             globalTexture = new spine.GLTexture(gl, img, false);
@@ -225,16 +229,16 @@ window.startSpine42 = async function(canvas, files) {
             let skelData;
             
             if(map.main.name.includes('.skel')) {
-                ui.log("解析二进制文件...");
+                ui.log(window.t("status.parseBin"), "status.parseBin");
                 const buffer = await readFile(map.main, 'array');
                 skelData = new spine.SkeletonBinary(loader).readSkeletonData(new Uint8Array(buffer));
             } else {
-                ui.log("解析 JSON 文件...");
+                ui.log(window.t("status.parseJson"), "status.parseJson");
                 const text = await readFile(map.main, 'text');
                 skelData = new spine.SkeletonJson(loader).readSkeletonData(JSON.parse(text));
             }
             
-            ui.log(`版本: ${skelData.version}`);
+            ui.log(window.t("status.version", { v: skelData.version }), "status.version", { v: skelData.version });
 
             skeleton = new spine.Skeleton(skelData);
             
@@ -289,7 +293,7 @@ window.startSpine42 = async function(canvas, files) {
             document.getElementById('controls').style.display = 'flex';
             if(window.refreshBoneTree) window.refreshBoneTree();
             
-        } catch(e) { ui.log(e.message, 'err'); }
+        } catch(e) { ui.log(window.t("status.loadFail", { msg: e.message }), "status.loadFail", { msg: String(e.message) }); }
     }
 
     function setupUI(data) {

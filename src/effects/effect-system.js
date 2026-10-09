@@ -29,7 +29,7 @@ window.effectSystem = {
         
         const loadingMsg = document.createElement('div');
         loadingMsg.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;color:#f6f6f4;padding:16px 18px;border-radius:0;border:1px solid #f6f6f4;font-family:Inter,sans-serif;z-index:999;";
-        loadingMsg.innerText = "正在分析文件结构...";
+        loadingMsg.innerText = window.t("fx.analyzing");
         document.body.appendChild(loadingMsg);
 
         try {
@@ -113,11 +113,11 @@ window.effectSystem = {
             }
 
             if(tasks.length === 0) {
-                alert("未找到有效的图片序列！");
+                alert(window.t("fx.noneFound"));
                 return;
             }
 
-            loadingMsg.innerText = `正在加载 ${tasks.length} 个特效...`;
+            loadingMsg.innerText = window.t("fx.loadingN", { n: tasks.length });
             
             // 并行执行所有加载任务
             const results = await Promise.all(tasks);
@@ -142,11 +142,11 @@ window.effectSystem = {
             });
             
             this.updateResList();
-            alert(`成功导入 ${results.length} 个特效！`);
+            alert(window.t("fx.importedN", { n: results.length }));
 
         } catch(e) {
             console.error(e);
-            alert("加载失败：" + e.message);
+            alert(window.t("fx.loadFail", { msg: e.message }));
         } finally {
             if(loadingMsg.parentNode) loadingMsg.parentNode.removeChild(loadingMsg);
         }
@@ -240,7 +240,7 @@ window.effectSystem = {
             
         } catch(e) {
             console.error(e);
-            alert("切图失败: " + e.message);
+            alert(window.t("fx.sliceFail", { msg: e.message }));
         }
     },
     // ------------------
@@ -250,7 +250,7 @@ window.effectSystem = {
         const names = Object.keys(this.effects);
         
         if(names.length === 0) {
-            list.innerHTML = '<div style="padding:20px; text-align:center; color:#555;">暂无特效</div>';
+            list.innerHTML = '<div data-i18n="fx.empty" style="padding:20px; text-align:center; color:#555;">' + window.t("fx.empty") + '</div>';
             return;
         }
         
@@ -273,7 +273,7 @@ window.effectSystem = {
             thumb.style.cssText = "width:32px; height:32px; object-fit:contain; background:#f6f6f4; margin-right:10px; border-radius:0; border:1px solid #111;";
             
             const info = document.createElement('span');
-            info.innerText = `${name} (${eff.frames.length}帧)`;
+            info.innerText = window.t("fx.frames", { name: name, n: eff.frames.length });
             info.style.cssText = "color:#111; font-size:13px; flex:1;";
             
             // 按钮组
@@ -283,7 +283,8 @@ window.effectSystem = {
             
             const btnSettings = document.createElement('button');
             btnSettings.innerText = "⚙️";
-            btnSettings.title = "设置属性 (Settings)";
+            btnSettings.title = window.t("fx.settings");
+            btnSettings.setAttribute("data-i18n-title", "fx.settings");
             btnSettings.style.cssText = "font-size:12px; padding:4px 6px; background:#fff; color:#111; border:1px solid #111; border-radius:0; cursor:pointer;";
             
             const btnPlay = document.createElement('button');
@@ -292,7 +293,8 @@ window.effectSystem = {
             const isPreviewing = eff.previewInstanceId;
             
             btnPlay.innerText = isPreviewing ? "⏹" : "▶";
-            btnPlay.title = isPreviewing ? "停止 (Stop)" : "预览 (Preview)";
+            btnPlay.title = window.t(isPreviewing ? "fx.stop" : "fx.preview");
+            btnPlay.setAttribute("data-i18n-title", isPreviewing ? "fx.stop" : "fx.preview");
             const bg = isPreviewing ? "#111" : "#fff";
             const fg = isPreviewing ? "#fff" : "#111";
             btnPlay.style.cssText = `font-size:12px; padding:4px 8px; background:${bg}; color:${fg}; border:1px solid #111; border-radius:0; cursor:pointer; min-width:25px;`;
@@ -303,14 +305,16 @@ window.effectSystem = {
                         this.stop(eff.previewInstanceId);
                         eff.previewInstanceId = null;
                         btnPlay.innerText = "▶";
-                        btnPlay.title = "预览 (Preview)";
+                        btnPlay.title = window.t("fx.preview");
+                        btnPlay.setAttribute("data-i18n-title", "fx.preview");
                         btnPlay.style.background = "#fff";
                         btnPlay.style.color = "#111";
                     } else {
                         // Start Loop Preview (maxLoop: -1 for infinite)
                         eff.previewInstanceId = this.play(name, 0, 0, 1, { maxLoop: -1, isPreview: true });
                         btnPlay.innerText = "⏹";
-                        btnPlay.title = "停止 (Stop)";
+                        btnPlay.title = window.t("fx.stop");
+                        btnPlay.setAttribute("data-i18n-title", "fx.stop");
                         btnPlay.style.background = "#111";
                         btnPlay.style.color = "#fff";
                     }
@@ -318,11 +322,12 @@ window.effectSystem = {
 
             const btnDel = document.createElement('button');
             btnDel.innerText = "🗑";
-            btnDel.title = "删除 (Delete)";
+            btnDel.title = window.t("fx.delete");
+            btnDel.setAttribute("data-i18n-title", "fx.delete");
             btnDel.style.cssText = "font-size:12px; padding:4px 6px; background:#fff; color:#111; border:1px solid #111; border-radius:0; cursor:pointer;";
             btnDel.onclick = (e) => {
                 e.stopPropagation();
-                if(confirm('确定删除特效 ' + name + ' 吗？')) {
+                if(confirm(window.t("fx.confirmDelete", { name: name }))) {
                     delete this.effects[name];
                     this.updateResList();
                     this.refreshBindList();
@@ -413,12 +418,12 @@ window.effectSystem = {
                 return r;
             };
 
-            settingsPanel.appendChild(createInputRow("缩放 X (Scale X)", "scaleX", "number", 0.1, -5.0, 5.0));
-            settingsPanel.appendChild(createInputRow("缩放 Y (Scale Y)", "scaleY", "number", 0.1, -5.0, 5.0));
-            settingsPanel.appendChild(createInputRow("旋转 (Rotation)", "rotation", "number", 1, -360, 360));
-            settingsPanel.appendChild(createInputRow("X 偏移 (Off X)", "offsetX", "number", 1, -500, 500));
-            settingsPanel.appendChild(createInputRow("Y 偏移 (Off Y)", "offsetY", "number", 1, -500, 500));
-            settingsPanel.appendChild(createInputRow("帧率 (FPS)", "fps", "number", 1, 1, 60));
+            settingsPanel.appendChild(createInputRow(window.t("fx.scaleX"), "scaleX", "number", 0.1, -5.0, 5.0));
+            settingsPanel.appendChild(createInputRow(window.t("fx.scaleY"), "scaleY", "number", 0.1, -5.0, 5.0));
+            settingsPanel.appendChild(createInputRow(window.t("fx.rotation"), "rotation", "number", 1, -360, 360));
+            settingsPanel.appendChild(createInputRow(window.t("fx.offX"), "offsetX", "number", 1, -500, 500));
+            settingsPanel.appendChild(createInputRow(window.t("fx.offY"), "offsetY", "number", 1, -500, 500));
+            settingsPanel.appendChild(createInputRow(window.t("fx.fps"), "fps", "number", 1, 1, 60));
 
             // Toggle logic
             let isOpen = false;
@@ -487,7 +492,9 @@ window.effectSystem = {
         
         // 动态设置文本
         const hasEvents = this.currentEvents.length > 0;
-        btnRefresh.innerText = hasEvents ? "🔄 重新扫描事件" : "🔍 扫描事件";
+        const scanKey = hasEvents ? "fx.rescan" : "fx.scan";
+        btnRefresh.innerText = window.t(scanKey);
+        btnRefresh.setAttribute("data-i18n", scanKey);
         
         btnRefresh.style.cssText = "font-size:13px; padding:8px 20px; background:#111; color:#f6f6f4; border:1px solid #111; cursor:pointer; border-radius:0; font-weight:600;";
         btnRefresh.onmouseover = () => btnRefresh.style.background = "#000";
@@ -497,7 +504,7 @@ window.effectSystem = {
             this.scanEvents();
             // 扫描后不弹窗，体验更好，或者仅在无事件时提示
             if(this.currentEvents.length === 0) {
-                alert("未检测到事件 (可能是纯动作文件或事件未导出)");
+                alert(window.t("fx.noEventsAlert"));
             }
         };
         headerRow.appendChild(btnRefresh);
@@ -505,7 +512,7 @@ window.effectSystem = {
         
         if(this.currentEvents.length === 0) {
             const emptyMsg = document.createElement('div');
-            emptyMsg.innerHTML = '<div style="padding:20px; text-align:center; color:#555;">当前骨架没有检测到事件<br><span style="font-size:10px">(可能是纯动作文件，或事件未正确导出)</span></div>';
+            emptyMsg.innerHTML = '<div data-i18n-html="fx.noEventsDetail" style="padding:20px; text-align:center; color:#555;">' + window.t("fx.noEventsDetail") + '</div>';
             list.appendChild(emptyMsg);
             return;
         }
@@ -562,11 +569,13 @@ window.effectSystem = {
                 // 左侧：Z-Index 控制器
                 const zControl = document.createElement('div');
                 zControl.style.cssText = "display:flex; align-items:center; background:rgba(0,0,0,0.3); border-radius:3px; overflow:hidden;";
-                zControl.title = "层级 (Z-Index)";
+                zControl.title = window.t("fx.zTitle");
+                zControl.setAttribute("data-i18n-title", "fx.zTitle");
                 
                 // 标签 Z
                 const zLabel = document.createElement('div');
-                zLabel.innerText = "层";
+                zLabel.innerText = window.t("fx.layer");
+                zLabel.setAttribute("data-i18n", "fx.layer");
                 zLabel.style.cssText = "padding:0 4px; font-size:10px; color:#aaa; border-right:1px solid #444; background:rgba(0,0,0,0.2); height:24px; line-height:24px;";
                 zControl.appendChild(zLabel);
 
@@ -612,11 +621,13 @@ window.effectSystem = {
                 // 次数控制器容器 (仿照 zControl)
                 const pControl = document.createElement('div');
                 pControl.style.cssText = "display:flex; align-items:center; background:rgba(0,0,0,0.3); border-radius:3px; overflow:hidden;";
-                pControl.title = "播放次数 (Play Count)";
+                pControl.title = window.t("fx.playCount");
+                pControl.setAttribute("data-i18n-title", "fx.playCount");
 
                 // 标签 次
                 const pLabel = document.createElement('div');
-                pLabel.innerText = "次";
+                pLabel.innerText = window.t("fx.times");
+                pLabel.setAttribute("data-i18n", "fx.times");
                 pLabel.style.cssText = "padding:0 4px; font-size:10px; color:#aaa; border-right:1px solid #444; background:rgba(0,0,0,0.2); height:24px; line-height:24px; display:flex; align-items:center;";
                 pControl.appendChild(pLabel);
 
@@ -631,7 +642,8 @@ window.effectSystem = {
                 const pValInput = document.createElement('input');
                 pValInput.type = "text"; 
                 pValInput.value = effObj.maxLoop === -1 ? 1 : effObj.maxLoop;
-                pValInput.title = "播放次数 (Play Count)"; 
+                pValInput.title = window.t("fx.playCount");
+                pValInput.setAttribute("data-i18n-title", "fx.playCount"); 
                 pValInput.style.cssText = "width:30px; height:20px; background:#fff; border:1px solid #111; color:#111; font-family:monospace; font-size:12px; font-weight:bold; text-align:center; padding:0; outline:none;";
                 
                 if(effObj.maxLoop === -1) pValInput.style.opacity = "0.5";
@@ -646,7 +658,8 @@ window.effectSystem = {
                 // 4. 循环开关按钮 (在容器外)
                 const btnLoop = document.createElement('button');
                 btnLoop.innerText = "∞";
-                btnLoop.title = "无限循环开关 (Infinite Loop)";
+                btnLoop.title = window.t("fx.loop");
+                btnLoop.setAttribute("data-i18n-title", "fx.loop");
                 const isLoop = effObj.maxLoop === -1;
                 btnLoop.style.cssText = `width:20px; height:20px; border:none; border-radius:3px; font-size:14px; line-height:1; cursor:pointer; padding:0; background:${isLoop ? '#00e5ff' : '#333'}; color:${isLoop ? '#000' : '#777'}; transition:all 0.2s; margin-left:2px;`;
                 
@@ -768,7 +781,8 @@ window.effectSystem = {
 
             // 2. 渲染中间“本体”层
             const bodyLayer = document.createElement('div');
-            bodyLayer.innerHTML = "🧍 角色本体 (Body)";
+            bodyLayer.textContent = window.t("fx.body");
+            bodyLayer.setAttribute("data-i18n", "fx.body");
             bodyLayer.style.cssText = "background:#333; color:#777; padding:5px 8px; border-radius:4px; font-size:12px; text-align:center; border:1px dashed #555; margin: 2px 0; user-select:none;";
             stackContainer.appendChild(bodyLayer);
 
@@ -781,7 +795,8 @@ window.effectSystem = {
             // 右侧：添加按钮
             const addSelect = document.createElement('select');
             addSelect.style.cssText = "width:36px; height:36px; background:#222; border:1px solid #555; color:#eee; padding:0 5px; font-size:18px; cursor:pointer; border-radius:4px; text-align:center; margin-top:5px;";
-            addSelect.title = "添加特效绑定";
+            addSelect.title = window.t("fx.addBind");
+            addSelect.setAttribute("data-i18n-title", "fx.addBind");
             
             const optDef = document.createElement('option');
             optDef.text = "+";

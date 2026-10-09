@@ -66,7 +66,7 @@ async function loadFiles41(files) {
             URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
             if(!gl || gl.isContextLost()) {
-                if (window.log) window.log("加载失败: WebGL 上下文已丢失");
+                if (window.log) window.log(window.t("status.webglLost"), "status.webglLost");
                 return;
             }
             try {
@@ -111,28 +111,30 @@ async function loadFiles41(files) {
             if(rendererRequestId) cancelAnimationFrame(rendererRequestId);
             requestAnimationFrame(render41);
                 const ver = skeletonData && skeletonData.version;
-                if (window.log) window.log(ver ? `版本: ${ver}` : "加载完成");
+                if (window.log) window.log(ver ? window.t("status.version", { v: ver }) : window.t("status.loaded"), ver ? "status.version" : "status.loaded", ver ? { v: ver } : undefined);
             } catch (e) {
                 console.error(e);
-                const msg = "加载失败: " + (e && e.message ? e.message : e);
-                if (window.log) window.log(msg);
+                const detail = e && e.message ? e.message : e;
+                const msg = window.t("status.loadFail", { msg: detail });
+                if (window.log) window.log(msg, "status.loadFail", { msg: String(detail) });
                 alert(msg);
             }
         };
         img.onerror = () => {
             URL.revokeObjectURL(imgUrl);
             if (window.viewerConfig.currentLoadId !== myLoadId) return;
-            const msg = "贴图解码失败";
-            if (window.log) window.log(msg);
+            const msg = window.t("status.textureFail");
+            if (window.log) window.log(msg, "status.textureFail");
             alert(msg);
         };
-        if (window.log) window.log('正在解码贴图…');
+        if (window.log) window.log(window.t("status.decoding"), "status.decoding");
         img.src = imgUrl;
 
     } catch(e) {
         console.error(e);
-        const msg = "4.1 加载错误: " + (e && e.message ? e.message : e);
-        if (window.log) window.log(msg);
+        const detail = e && e.message ? e.message : e;
+        const msg = window.t("status.err41", { msg: detail });
+        if (window.log) window.log(msg, "status.err41", { msg: String(detail) });
         alert(msg);
     }
 }

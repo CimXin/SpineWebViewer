@@ -1102,3 +1102,44 @@ h1, .splash-title {
 }
 
 #search-count { color: var(--muted) !important; font-family: var(--font-mono); }
+
+.lang-switch {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 110;
+    display: flex;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.72);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    pointer-events: auto;
+}
+.lang-switch button {
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    min-width: 42px;
+}
+.lang-switch button + button {
+    border-left: 1px solid rgba(255,255,255,0.28);
+}
+.lang-switch button.active {
+    background: var(--field);
+    color: #111;
+}
+.lang-switch button:hover {
+    color: #fff;
+}
+.lang-switch button.active:hover {
+    color: #111;
+}
