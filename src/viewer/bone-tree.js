@@ -28,6 +28,7 @@ function appendBone(ul, bone, skeleton, used, highlight) {
     li.appendChild(btn);
     const kids = childrenOf(bone, skeleton);
     if (kids.length) {
+        li.classList.add("has-children");
         const childUl = document.createElement("ul");
         kids.forEach((child) => appendBone(childUl, child, skeleton, used, highlight));
         li.appendChild(childUl);

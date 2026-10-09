@@ -156,6 +156,43 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
     border-color: var(--ink);
     background: #fff;
 }
+select,
+select::picker(select) {
+    appearance: base-select;
+}
+select::picker(select) {
+    background: #fff;
+    color: #111;
+    border: 1px solid #111;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+select::picker-icon {
+    color: currentColor;
+}
+select option {
+    background: #fff;
+    color: #111;
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border-radius: 0;
+}
+select option:hover,
+select option:focus {
+    background: var(--field);
+    color: #111;
+}
+select option:checked,
+select option:checked:hover {
+    background: #111;
+    color: #f6f6f4;
+}
+select option::checkmark {
+    display: none;
+}
 
 .color-group { display: flex; gap: 6px; align-items: center; }
 .color-preset {
@@ -451,7 +488,6 @@ input[type=checkbox] {
 
 #ui label, #ui .control-row label { color: #e8e8e6 !important; }
 #ui select,
-#ui option,
 #ui input[type="text"],
 #ui input[type="number"] {
     background: #1a1a1a !important;
@@ -459,6 +495,25 @@ input[type=checkbox] {
     border: 1px solid rgba(255,255,255,0.45) !important;
     border-radius: 0 !important;
     color-scheme: dark;
+}
+#ui select::picker(select) {
+    background: #1a1a1a;
+    color: #f4f4f2;
+    border: 1px solid rgba(255,255,255,0.45);
+}
+#ui select option {
+    background: #1a1a1a;
+    color: #f4f4f2;
+}
+#ui select option:hover,
+#ui select option:focus {
+    background: var(--field);
+    color: #111;
+}
+#ui select option:checked,
+#ui select option:checked:hover {
+    background: #111;
+    color: var(--field);
 }
 #event-log {
     font-family: var(--font-mono);
@@ -487,53 +542,108 @@ input[type=checkbox] {
 #ui input[type=range] { color: #f4f4f2; }
 #ui .divider { border-top-color: rgba(255,255,255,0.16); }
 
-.origin-toggle {
-    display: flex;
+.origin-overlay {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: none;
     align-items: center;
     gap: 8px;
     margin: 0;
+    padding: 7px 12px;
+    background: #111;
+    color: #f6f6f4;
+    border: 1px solid rgba(255,255,255,0.72);
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
-    color: #f4f4f2;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.origin-overlay input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: var(--field);
     cursor: pointer;
 }
-.origin-hint, .bone-tree-hint {
+body:has(#ui[style*="display: block"]) .origin-overlay,
+body:has(#ui[style*="display:block"]) .origin-overlay {
+    display: flex;
+}
+.bone-tree-hint {
     margin: 0 0 8px;
-    color: #9a9a9a;
+    color: #bdbdbd;
     font-size: 12px;
     line-height: 1.45;
 }
 .bone-tree {
-    max-height: 240px;
+    max-height: 280px;
     overflow: auto;
     font-family: var(--font-mono);
-    font-size: 11px;
-    color: #ddd;
+    font-size: 12px;
+    color: #e8e8e6;
+    background: #0c0c0c;
+    border: 1px solid rgba(255,255,255,0.28);
+    padding: 6px 6px 8px;
 }
-.bone-tree ul { list-style: none; margin: 0; padding-left: 14px; }
-.bone-tree > ul { padding-left: 0; }
-.bone-tree li { margin: 1px 0; }
+.bone-tree ul { list-style: none; margin: 0; padding: 0; }
+.bone-tree ul ul {
+    margin: 2px 0 6px 12px;
+    padding: 2px 0 2px 12px;
+    border-left: 2px solid rgba(171, 186, 186, 0.85);
+}
+.bone-tree li { margin: 0; }
 #ui .bone-tree-node {
-    display: block;
+    display: flex !important;
+    align-items: center;
     width: 100%;
     text-align: left;
     background: transparent !important;
-    color: #e8e8e6 !important;
+    color: #d7d7d4 !important;
     border: 0 !important;
     border-radius: 0;
-    padding: 3px 6px;
+    padding: 5px 8px;
+    margin: 1px 0;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     justify-content: flex-start;
-    box-shadow: none;
+    box-shadow: none !important;
+    gap: 0;
 }
-#ui .bone-tree-node:hover { background: rgba(255,255,255,0.06) !important; color: #fff !important; }
-#ui .bone-tree-node.active {
-    background: transparent !important;
+#ui .bone-tree-node::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    margin-right: 8px;
+    border: 1px solid var(--field);
+    background: transparent;
+    box-sizing: border-box;
+}
+#ui li.has-children > .bone-tree-node {
+    color: #fff !important;
+    font-weight: 650;
+}
+#ui li.has-children > .bone-tree-node::before {
+    background: var(--field);
+    border-color: var(--field);
+}
+#ui .bone-tree-node:hover {
+    background: rgba(255,255,255,0.1) !important;
+    color: #fff !important;
+}
+#ui .bone-tree-node.active,
+#ui .bone-tree-node.active:hover,
+#ui li.has-children > .bone-tree-node.active {
+    background: rgba(171, 186, 186, 0.22) !important;
     color: var(--field) !important;
-    box-shadow: inset 2px 0 0 var(--field);
+    box-shadow: inset 3px 0 0 var(--field) !important;
 }
 
 /* Effect manager: light window chrome */
@@ -653,13 +763,9 @@ input[type=checkbox] {
 }
 #time-unit-select,
 #controls select,
-#controls option,
 #file-panel select,
-#file-panel option,
 #effect-panel select,
-#effect-panel option,
 #sheet-modal select,
-#sheet-modal option,
 #sheet-modal input,
 #file-panel input[type="text"],
 #file-panel input[type="number"],
@@ -668,6 +774,59 @@ input[type=checkbox] {
     color: #111 !important;
     background-color: #fff !important;
     color-scheme: light;
+}
+#controls select option,
+#file-panel select option,
+#effect-panel select option,
+#sheet-modal select option,
+#time-unit-select option {
+    color: #111;
+    background: #fff;
+}
+#controls select option:hover,
+#file-panel select option:hover,
+#effect-panel select option:hover,
+#sheet-modal select option:hover,
+#time-unit-select option:hover,
+#controls select option:focus,
+#file-panel select option:focus,
+#effect-panel select option:focus,
+#sheet-modal select option:focus,
+#time-unit-select option:focus {
+    background: var(--field);
+    color: #111;
+}
+#controls select option:checked,
+#file-panel select option:checked,
+#effect-panel select option:checked,
+#sheet-modal select option:checked,
+#time-unit-select option:checked,
+#controls select option:checked:hover,
+#file-panel select option:checked:hover,
+#effect-panel select option:checked:hover,
+#sheet-modal select option:checked:hover,
+#time-unit-select option:checked:hover {
+    background: #111;
+    color: #f6f6f4;
+}
+#version-select::picker(select) {
+    background: #1a1a1a;
+    color: #f4f4f2;
+    border: 1px solid rgba(255,255,255,0.55);
+}
+#version-select option {
+    background: #1a1a1a;
+    color: #f4f4f2;
+}
+#version-select option:hover,
+#version-select option:focus {
+    background: var(--field);
+    color: #111;
+}
+#version-select option:checked,
+#version-select option:checked:hover {
+    background: #111;
+    color: var(--field);
 }
 #time-unit-select { min-width: 46px; }
 .play-row { display: flex; align-items: center; gap: 12px; width: 100%; }

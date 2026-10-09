@@ -65,6 +65,12 @@
     <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 </div>
 
+<label id="origin-overlay" class="origin-overlay" title="红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点">
+    <span>原点坐标轴</span>
+    <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked">
+    <span>显示</span>
+</label>
+
     <!-- 特效管理面板 (重构版 - 可拖动 + 右侧定位) -->
     <div id="effect-panel" class="panel marks" style="position:fixed; top:auto; bottom:120px; right:320px; width:600px; height:520px; display:none; z-index:200; flex-direction:column; padding:0; overflow:hidden; transform-origin: bottom right;">
         
@@ -199,19 +205,6 @@
 
 <div id="ui" class="panel marks">
 
-    <div class="ui-group open">
-        <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">✚ 原点坐标轴</span>
-            <label class="origin-toggle" onclick="event.stopPropagation()" title="红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点">
-                <span>显示</span>
-                <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked">
-            </label>
-        </div>
-        <div class="ui-content">
-            <p class="origin-hint">红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点。取消「显示」即隐藏。</p>
-        </div>
-    </div>
-    
     <!-- 1. 动画模块 (默认打开) -->
     <div class="ui-group open">
         <div class="ui-header" onclick="toggleGroup(this)">
@@ -283,7 +276,7 @@
         </div>
     </div>
 
-    <div class="ui-group open">
+    <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
             <span class="ui-title">🌳 骨骼层级 (Hierarchy)</span>
             <span class="ui-arrow">▶</span>
