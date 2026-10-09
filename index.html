@@ -251,7 +251,7 @@
                 <label>预乘 Alpha (PMA)</label>
                 <div style="display:flex; gap:10px;">
                      <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，图片加载时不进行预乘（因为图片已经预乘过了），渲染时使用 One 混合模式。">
-                        <input type="checkbox" id="chk-pma" checked onchange="window.togglePMA(this.checked)"> PMA
+                        <input type="checkbox" id="chk-pma" onchange="window.togglePMA(this.checked)"> PMA
                     </label>
                     <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，让 WebGL 在加载图片时自动乘上 Alpha。通常用于直通(Straight)导出的图片。">
                         <input type="checkbox" id="chk-unpack" onchange="window.toggleUnpack(this.checked)"> Unpack

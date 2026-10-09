@@ -85,7 +85,7 @@ window.startSpine42 = async function(canvas, files) {
         batcher = new spine.PolygonBatcher(gl, true); 
         renderer = new spine.SkeletonRenderer(gl);
         renderer.twoColor = true;
-        renderer.premultipliedAlpha = true;
+        renderer.premultipliedAlpha = !!(window.viewerConfig && window.viewerConfig.pmaEnabled);
         
         bindInput();
         
@@ -437,7 +437,8 @@ window.startSpine42 = async function(canvas, files) {
             shader.setUniformi(spine.Shader.SAMPLER, 0);
 
             // 从全局配置读取 PMA
-            const pma = window.viewerConfig ? window.viewerConfig.pmaEnabled : true;
+            const pma = !!(window.viewerConfig && window.viewerConfig.pmaEnabled);
+            renderer.premultipliedAlpha = pma;
             
             gl.enable(gl.BLEND);
             gl.blendFunc(pma ? gl.ONE : gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

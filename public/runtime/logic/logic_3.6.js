@@ -27,7 +27,7 @@ function startSpine36(canvasElement, files) {
     mvp = new spine.webgl.Matrix4();
     skeletonRenderer = new spine.webgl.SkeletonRenderer(gl);
     
-    skeletonRenderer.premultipliedAlpha = true; 
+    skeletonRenderer.premultipliedAlpha = !!(window.viewerConfig && window.viewerConfig.pmaEnabled);
     addPmaToggle36();
     loadFiles36(files);
 }
@@ -35,10 +35,7 @@ function startSpine36(canvasElement, files) {
 function addPmaToggle36() {
     const chk = document.getElementById('chk-pma');
     if (chk) {
-        // 恢复默认勾选
-        chk.checked = true;
-        window.viewerConfig.pmaEnabled = true;
-        
+        window.viewerConfig.pmaEnabled = chk.checked;
         chk.onchange = (e) => {
             window.viewerConfig.pmaEnabled = e.target.checked;
         };
