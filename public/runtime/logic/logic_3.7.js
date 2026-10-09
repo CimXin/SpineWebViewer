@@ -99,6 +99,7 @@ async function loadFiles37(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render37();
         };
+        if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {

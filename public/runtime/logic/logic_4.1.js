@@ -105,6 +105,7 @@ async function loadFiles41(files) {
             if(rendererRequestId) cancelAnimationFrame(rendererRequestId);
             requestAnimationFrame(render41);
         };
+        if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {

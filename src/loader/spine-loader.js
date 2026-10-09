@@ -31,12 +31,24 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     const effectCanvas = document.getElementById('effect-canvas');
     wrapper.insertBefore(newCanvas, effectCanvas);
 
-    // 重置状态
+    // 重置状态。运行时对象按版本缓存，这里不要清掉。
     window.skeleton = null;
     window.animationState = null;
-    window.spine = undefined; 
     if(window.debugRenderer) window.debugRenderer.drawBones(null, 0,0,1,0);
     if(window.refreshBoneTree) window.refreshBoneTree();
+
+    log('正在准备预览…');
+    document.getElementById('file-panel').style.display = 'flex';
+    const dropZoneEarly = document.getElementById('drop-zone');
+    if (dropZoneEarly && dropZoneEarly.style.display !== 'none') {
+        dropZoneEarly.style.opacity = 0;
+        window.__dropZoneToken = (window.__dropZoneToken || 0) + 1;
+        const earlyToken = window.__dropZoneToken;
+        setTimeout(() => {
+            if (window.__dropZoneToken !== earlyToken) return;
+            dropZoneEarly.style.display = 'none';
+        }, 200);
+    }
 
     // 识别文件
     let map = { skel: null, json: null, atlas: null, png: null };
@@ -66,7 +78,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         }
     }
     
-    log(`加载: ${version} ...`);
+    log(`加载 Spine ${version} …`);
     
     // 更新 UI 状态
     document.getElementById('version-label').style.display = 'block';
@@ -86,16 +98,6 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         vSelect.value = ""; 
     }
     
-    document.getElementById('file-panel').style.display = 'flex';
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.style.opacity = 0;
-    window.__dropZoneToken = (window.__dropZoneToken || 0) + 1;
-    const dropToken = window.__dropZoneToken;
-    setTimeout(() => {
-        if (window.__dropZoneToken !== dropToken) return;
-        dropZone.style.display = 'none';
-    }, 500);
-
     // 隐藏不需要的 UI
     document.getElementById('ui').style.display = 'none';
     document.getElementById('controls').style.display = 'none';
@@ -133,42 +135,88 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         "4.2": "startSpine42",
     }[runtimeKey];
 
-    const base = window.__ASSET_BASE__ || "/";
-    const runtimeUrl = `${base}vendor/spine/${runtimeKey}/spine-webgl.js?t=${ts}`;
-    const logicUrl = `${base}runtime/logic/logic_${runtimeKey}.js?t=${ts}`;
+    try {
+        await ensureSpineRuntime(runtimeKey);
+        await ensureSpineLogic(runtimeKey);
+    } catch (err) {
+        alert(`无法加载脚本: ${err.message || err}`);
+        return;
+    }
+    if (window.viewerConfig.currentLoadId !== ts) return;
+    window.spine = window.__spineRuntimes[runtimeKey];
+    const start = window[entry];
+    if (start) start(newCanvas, files);
+    else alert(`缺少版本适配器: ${entry}`);
+}
 
-    loadScript(runtimeUrl, () => {
-        loadScript(logicUrl, () => {
-            const start = window[entry];
-            if (start) start(newCanvas, files);
-            else alert(`缺少版本适配器: ${entry}`);
-        });
+const spineRuntimePromises = {};
+const spineLogicPromises = {};
+
+function loadClassicScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(src));
+        document.head.appendChild(script);
     });
+}
+
+function ensureSpineRuntime(runtimeKey) {
+    if (!window.__spineRuntimes) window.__spineRuntimes = {};
+    if (window.__spineRuntimes[runtimeKey]) {
+        window.spine = window.__spineRuntimes[runtimeKey];
+        return Promise.resolve();
+    }
+    if (!spineRuntimePromises[runtimeKey]) {
+        const base = window.__ASSET_BASE__ || "/";
+        spineRuntimePromises[runtimeKey] = loadClassicScript(`${base}vendor/spine/${runtimeKey}/spine-webgl.js`).then(() => {
+            window.__spineRuntimes[runtimeKey] = window.spine;
+        });
+    }
+    return spineRuntimePromises[runtimeKey].then(() => {
+        window.spine = window.__spineRuntimes[runtimeKey];
+    });
+}
+
+function ensureSpineLogic(runtimeKey) {
+    const entry = {
+        "3.6": "startSpine36",
+        "3.7": "startSpine37",
+        "3.8": "startSpine38",
+        "4.0": "startSpine40",
+        "4.1": "startSpine41",
+        "4.2": "startSpine42",
+    }[runtimeKey];
+    if (entry && typeof window[entry] === "function") return Promise.resolve();
+    if (!spineLogicPromises[runtimeKey]) {
+        const base = window.__ASSET_BASE__ || "/";
+        spineLogicPromises[runtimeKey] = loadClassicScript(`${base}runtime/logic/logic_${runtimeKey}.js`);
+    }
+    return spineLogicPromises[runtimeKey];
 }
 
 window.loadScript = function(src, callback) {
-    let script = document.createElement('script');
-    script.src = src;
-    script.onload = callback;
-    script.onerror = () => alert(`无法加载脚本: ${src}`);
-    document.head.appendChild(script);
+    loadClassicScript(src).then(callback, () => alert(`无法加载脚本: ${src}`));
 }
 
-window.detectJsonVersion = function(file) {
-    return new Promise(async r => {
-        try {
-            const text = await window.readFileAsText(file);
-            const o = JSON.parse(text); 
-            r(o.skeleton ? o.skeleton.spine : null); 
-        } catch { r(null); }
-    });
+window.detectJsonVersion = async function(file) {
+    try {
+        const head = await window.readFileAsText(file.slice(0, 8192));
+        const match = head.match(/"spine"\s*:\s*"([^"]+)"/);
+        if (match) return match[1];
+        const text = await window.readFileAsText(file);
+        const data = JSON.parse(text);
+        return data.skeleton ? data.skeleton.spine : null;
+    } catch {
+        return null;
+    }
 }
 
-window.detectBinaryVersion = function(file) {
-    return new Promise(async r => {
-        const buffer = await window.readFileAsArrayBuffer(file);
-        const header = buffer.slice(0, 1024); 
-        const v = new DataView(header);
+window.detectBinaryVersion = async function(file) {
+    try {
+        const buffer = await window.readFileAsArrayBuffer(file.slice(0, 1024));
+        const v = new DataView(buffer);
         let s = "";
         for(let i=0; i<v.byteLength; i++) {
             let c = v.getUint8(i);
@@ -178,15 +226,12 @@ window.detectBinaryVersion = function(file) {
         if(m) {
             let ver = m[1];
             console.log("Detected Version:", m[0]);
-            if(ver === "3.6") r(m[0]); // 识别 3.6
-            else if(ver === "3.7") r(m[0]); 
-            else if(ver === "3.8") r(m[0]);
-            else if(ver === "4.0") r(m[0]);
-            else if(ver === "4.2") r(m[0]);
-            else r("4.1");
-        } else {
-            console.warn("Version not detected");
-            r(null);
+            if(ver === "3.6" || ver === "3.7" || ver === "3.8" || ver === "4.0" || ver === "4.2") return m[0];
+            return "4.1";
         }
-    });
+        console.warn("Version not detected");
+        return null;
+    } catch {
+        return null;
+    }
 }

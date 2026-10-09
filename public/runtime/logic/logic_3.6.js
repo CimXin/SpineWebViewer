@@ -107,6 +107,7 @@ async function loadFiles36(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render36();
         };
+        if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {
