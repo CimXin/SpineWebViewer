@@ -464,19 +464,6 @@
         .btn-folder:active {
             transform: translateY(1px) scale(0.98);
         }
-        .btn-folder.secondary {
-            margin-top: 0;
-            padding: 12px 28px;
-            font-size: 16px;
-            background: transparent;
-            color: #ddd;
-            border: 1px solid #666;
-            box-shadow: none;
-        }
-        .btn-folder.secondary:hover {
-            background: rgba(255,255,255,0.06);
-            box-shadow: none;
-        }
         .load-hint {
             max-width: 520px;
             margin: 0;

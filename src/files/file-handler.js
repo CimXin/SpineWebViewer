@@ -276,7 +276,7 @@ window.handleFiles = async function(files) {
 
     const found = groupSpineFiles(list);
     if (!found.length) {
-        alert('未找到完整的 Spine 文件。\n需要成套的 .json/.skel + .atlas + 贴图。\n添加单个动画时，请同时选中这几个文件。');
+        alert('未找到完整的 Spine 文件。\n需要成套的 .json/.skel + .atlas + 贴图。\n添加单个时，请在同一次选择里同时选中这些文件。页面读不到没选中的同目录文件。');
         return;
     }
 
