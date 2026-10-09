@@ -24,7 +24,7 @@ function startSpine41(canvasElement, files) {
     renderer = new spine.SceneRenderer(canvas, gl);
     assetManager = new spine.AssetManager(gl); 
     
-    renderer.premultipliedAlpha = true; 
+    renderer.premultipliedAlpha = !!(window.viewerConfig && window.viewerConfig.pmaEnabled); 
     addPmaToggle41();
     loadFiles41(files);
 }

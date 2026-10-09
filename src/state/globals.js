@@ -54,7 +54,7 @@ window.viewerConfig = {
     speed: 1.0,
     targetFps: 60,
     timeMode: 'seconds',
-    pmaEnabled: true, // 运行时混合开关
+    pmaEnabled: false, // 运行时混合开关，默认关闭
     unpackEnabled: false, // 加载时解包开关
     debugCtx: null,
     debugCanvas: null
