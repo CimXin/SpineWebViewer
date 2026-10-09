@@ -97,6 +97,7 @@ window.toggleFileView = function() {
         list.classList.add('view-grid');
         btn.innerText = "▦"; 
         localStorage.setItem('spine_view_mode', 'grid');
+        if (window.loadVisibleThumbs) window.loadVisibleThumbs();
     } else {
         list.classList.remove('view-grid');
         list.classList.add('view-list');

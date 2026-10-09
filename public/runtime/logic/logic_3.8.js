@@ -61,11 +61,13 @@ async function loadFiles38(files) {
 
     try {
         const atlasText = await readFileAsText(map.atlas);
-        const imgUrl = await readFileAsDataURL(map.png);
-        
+        const imgUrl = URL.createObjectURL(map.png);
+
         const img = new Image();
         img.onload = async () => {
+            URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
+            if(!gl || gl.isContextLost()) return;
             
             // 确保不预乘 (防止黑边) -> 修正：根据用户设置动态决定
             const unpack = window.viewerConfig.unpackEnabled || false;
@@ -98,6 +100,7 @@ async function loadFiles38(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render38();
         };
+        if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {

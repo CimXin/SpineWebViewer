@@ -55,11 +55,13 @@ async function loadFiles36(files) {
 
     try {
         const atlasText = await readFileAsText(map.atlas);
-        const imgUrl = await readFileAsDataURL(map.png);
-        
+        const imgUrl = URL.createObjectURL(map.png);
+
         const img = new Image();
         img.onload = async () => {
+            URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
+            if(!gl || gl.isContextLost()) return;
             
             // 根据用户设置决定是否让 WebGL 自动预乘 Alpha
             const unpack = window.viewerConfig.unpackEnabled || false;
@@ -107,6 +109,7 @@ async function loadFiles36(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render36();
         };
+        if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {

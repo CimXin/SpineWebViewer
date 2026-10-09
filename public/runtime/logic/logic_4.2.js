@@ -194,9 +194,11 @@ window.startSpine42 = async function(canvas, files) {
             const imgBlob = URL.createObjectURL(map.png);
             const img = new Image();
             img.onload = () => {
+                URL.revokeObjectURL(imgBlob);
                 if(window.viewerConfig.currentLoadId !== myLoadId) return;
                 processSpine(map, img);
             };
+            ui.log("正在解码贴图…");
             img.src = imgBlob;
         } catch(e) { ui.log(e, 'err'); }
     }

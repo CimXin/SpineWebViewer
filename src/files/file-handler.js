@@ -183,14 +183,14 @@ function renderSpineFileList(activeIndex) {
             toggleFav(g.displayName, star, item);
         };
 
-        let thumbUrl = fallbackThumb;
-        let pngFile = g.files.find(f => f.name.toLowerCase() === 'preview.png');
-        if (!pngFile) pngFile = g.files.find(f => classifySpineFile(f.name) === 'image');
-        if (pngFile) thumbUrl = URL.createObjectURL(pngFile);
+        let thumbFile = g.files.find(f => f.name.toLowerCase() === 'preview.png');
+        if (!thumbFile) thumbFile = g.files.find(f => classifySpineFile(f.name) === 'image');
 
         const img = document.createElement('img');
         img.className = 'file-thumb';
-        img.src = thumbUrl;
+        img.src = fallbackThumb;
+        img.alt = '';
+        if (thumbFile) img._thumbFile = thumbFile;
 
         const info = document.createElement('div');
         info.className = 'file-info';
@@ -215,6 +215,38 @@ function renderSpineFileList(activeIndex) {
     document.getElementById('file-list-container').style.display = groups.length ? 'block' : 'none';
     const search = document.getElementById('spine-file-search');
     if (search && window.filterSpineFiles) filterSpineFiles(search.value);
+    scheduleSpineThumbs();
+}
+
+function attachThumb(img) {
+    if (!img || !img._thumbFile || img.dataset.thumbLoaded) return;
+    img.dataset.thumbLoaded = '1';
+    img.src = URL.createObjectURL(img._thumbFile);
+}
+
+window.loadVisibleThumbs = function() {
+    const list = document.getElementById('custom-file-list');
+    if (!list || !list.classList.contains('view-grid')) return;
+    if (!window.__thumbObserver) {
+        window.__thumbObserver = new IntersectionObserver((entries) => {
+            const current = document.getElementById('custom-file-list');
+            if (!current || !current.classList.contains('view-grid')) return;
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                attachThumb(entry.target);
+                window.__thumbObserver.unobserve(entry.target);
+            });
+        }, { root: list, rootMargin: '120px' });
+    }
+    list.querySelectorAll('img.file-thumb').forEach(img => {
+        if (img._thumbFile && !img.dataset.thumbLoaded) window.__thumbObserver.observe(img);
+    });
+};
+
+function scheduleSpineThumbs() {
+    const run = () => window.loadVisibleThumbs();
+    if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 1500 });
+    else setTimeout(run, 700);
 }
 
 window.clearSpineList = function() {
@@ -308,11 +340,11 @@ window.handleFiles = async function(files) {
         return;
     }
 
-    const activeIndex = window.spineFileGroups.length - added.length;
-    renderSpineFileList(activeIndex);
     const summary = skipped
         ? `追加 ${added.length} 个，跳过 ${skipped} 个重复`
         : `已加入 ${added.length} 个骨架`;
     log(summary);
+    const activeIndex = window.spineFileGroups.length - added.length;
     loadSpineGroup(added[0].files);
+    renderSpineFileList(activeIndex);
 };
