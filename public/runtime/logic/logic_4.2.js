@@ -280,6 +280,7 @@ window.startSpine42 = async function(canvas, files) {
             // 显示UI
             document.getElementById('ui').style.display = 'block';
             document.getElementById('controls').style.display = 'flex';
+            if(window.refreshBoneTree) window.refreshBoneTree();
             
         } catch(e) { ui.log(e.message, 'err'); }
     }

@@ -36,6 +36,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     window.animationState = null;
     window.spine = undefined; 
     if(window.debugRenderer) window.debugRenderer.drawBones(null, 0,0,1,0);
+    if(window.refreshBoneTree) window.refreshBoneTree();
 
     // 识别文件
     let map = { skel: null, json: null, atlas: null, png: null };
@@ -110,6 +111,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     // 定义加载完成后的回调
     window.onSpineLoaded = function() {
         if(window.effectSystem) window.effectSystem.scanEvents();
+        if(window.refreshBoneTree) window.refreshBoneTree();
     };
 
     const ts = Date.now();

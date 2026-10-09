@@ -372,6 +372,47 @@
         line-height: 1.5;
     }
 
+    .bone-tree-hint {
+        margin: 0 0 8px;
+        color: #999;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+    .bone-tree {
+        max-height: 240px;
+        overflow: auto;
+        font-size: 12px;
+        color: #ccc;
+    }
+    .bone-tree ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 14px;
+    }
+    .bone-tree > ul {
+        padding-left: 0;
+    }
+    .bone-tree li {
+        margin: 1px 0;
+    }
+    .bone-tree-node {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        color: #ddd;
+        border-radius: 4px;
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+    .bone-tree-node:hover {
+        background: #333;
+    }
+    .bone-tree-node.active {
+        background: #3a3418;
+        color: #ffe14a;
+    }
+
     .ui-group.open .ui-content { display: block; }
     .ui-group.open .ui-arrow { transform: rotate(90deg); }
     .ui-group.open .ui-header { background: #2a2a2a; border-bottom-color: #444; }

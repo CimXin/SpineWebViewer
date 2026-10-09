@@ -49,6 +49,7 @@ window.viewerConfig = {
     bgColor: [0.2, 0.2, 0.2, 0.0],
     showBones: false,
     showOrigin: true,
+    highlightBone: null,
     boneColor: '#00ff00',
     boneScale: 1.0,
     speed: 1.0,
