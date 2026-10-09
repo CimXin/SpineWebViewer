@@ -65,10 +65,9 @@
     <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 </div>
 
-<label id="origin-overlay" class="origin-overlay" title="红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点">
-    <span>原点坐标轴</span>
-    <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked">
-    <span>显示</span>
+<label id="origin-overlay" class="origin-overlay" title="原点坐标轴">
+    <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴">
+    <span class="origin-icon" aria-hidden="true"></span>
 </label>
 
     <!-- 特效管理面板 (重构版 - 可拖动 + 右侧定位) -->
