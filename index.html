@@ -67,7 +67,12 @@
 
 <label id="origin-overlay" class="origin-overlay" title="原点坐标轴">
     <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴">
-    <span class="origin-icon" aria-hidden="true"></span>
+    <svg class="origin-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M3.4 13.25h10.8v1.7H3.4z"/>
+        <path fill="currentColor" d="M13.1 11.35 19.4 14.1 13.1 16.85z"/>
+        <path fill="currentColor" d="M10.25 8.35h1.7V20.6h-1.7z"/>
+        <path fill="currentColor" d="M8.15 8.85 11.1 4.05 14.05 8.85z"/>
+    </svg>
 </label>
 
     <!-- 特效管理面板 (重构版 - 可拖动 + 右侧定位) -->

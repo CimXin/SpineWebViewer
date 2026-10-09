@@ -556,8 +556,9 @@ input[type=checkbox] {
     margin: 0;
     padding: 0;
     background: #171717;
-    color: #f6f6f4;
-    border: 1px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.72);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    border-radius: 50%;
     cursor: pointer;
     user-select: none;
 }
@@ -571,38 +572,15 @@ input[type=checkbox] {
     cursor: pointer;
 }
 .origin-icon {
-    position: relative;
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
+    display: block;
     pointer-events: none;
-}
-.origin-icon::before,
-.origin-icon::after {
-    content: "";
-    position: absolute;
-    background: rgba(255,255,255,0.45);
-}
-.origin-icon::before {
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 2px;
-    transform: translateY(-50%);
-}
-.origin-icon::after {
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 2px;
-    transform: translateX(-50%);
 }
 .origin-overlay:has(input:checked) {
     background: var(--field);
+    color: #111;
     border-color: #111;
-}
-.origin-overlay:has(input:checked) .origin-icon::before,
-.origin-overlay:has(input:checked) .origin-icon::after {
-    background: #111;
 }
 .origin-overlay:hover {
     border-color: #fff;
