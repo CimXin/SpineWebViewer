@@ -206,6 +206,19 @@
 </div>
 
 <div id="ui" class="panel">
+
+    <div class="ui-group open">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">✚ 原点坐标轴</span>
+            <label class="origin-toggle" onclick="event.stopPropagation()" title="红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点">
+                <span>显示</span>
+                <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked">
+            </label>
+        </div>
+        <div class="ui-content">
+            <p class="origin-hint">红色横线是 X 轴，绿色竖线是 Y 轴，交点是骨架原点。取消「显示」即隐藏。</p>
+        </div>
+    </div>
     
     <!-- 1. 动画模块 (默认打开) -->
     <div class="ui-group open">
@@ -233,11 +246,6 @@
             </div>
 
             <div class="divider"></div>
-
-            <div class="control-row">
-                <label title="红色为 X 轴，绿色为 Y 轴，交点是骨架原点">原点坐标轴</label>
-                <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked">
-            </div>
 
             <div class="control-row">
                 <label>预乘 Alpha (PMA)</label>
