@@ -44,11 +44,10 @@
     <div id="web-input">
         <input type="file" id="folder-input" webkitdirectory directory style="display:none">
         <input type="file" id="files-input" multiple accept=".json,.json.txt,.skel,.skel.bytes,.atlas,.atlas.txt,.png,.jpg,.jpeg,.webp" style="display:none">
-        <button class="btn-folder" onclick="document.getElementById('folder-input').click()">📂 打开动画文件夹</button>
-        <p class="load-hint">再次打开文件夹会追加到左侧列表，不会清掉已经加载的骨架。</p>
+        <button class="btn-folder" onclick="document.getElementById('folder-input').click()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开动画文件夹</span></button>
     </div>
     <div id="native-input" style="display:none;">
-        <button class="btn-folder" onclick="openNativeFolder()">📂 打开本地文件夹</button>
+        <button class="btn-folder" onclick="openNativeFolder()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开本地文件夹</span></button>
     </div>
 </div>
 
