@@ -13,11 +13,11 @@ window.effectSystem = {
         document.getElementById('page-eff-res').style.display = tab === 'res' ? 'flex' : 'none';
         document.getElementById('page-eff-bind').style.display = tab === 'bind' ? 'flex' : 'none';
         
-        document.getElementById('tab-eff-res').style.background = tab === 'res' ? '#333' : '#222';
-        document.getElementById('tab-eff-res').style.color = tab === 'res' ? '#fff' : '#888';
-        
-        document.getElementById('tab-eff-bind').style.background = tab === 'bind' ? '#333' : '#222';
-        document.getElementById('tab-eff-bind').style.color = tab === 'bind' ? '#fff' : '#888';
+        document.getElementById('tab-eff-res').style.background = tab === 'res' ? '#f6f6f4' : '#e6e6e2';
+        document.getElementById('tab-eff-res').style.color = tab === 'res' ? '#111' : '#6b6b6b';
+
+        document.getElementById('tab-eff-bind').style.background = tab === 'bind' ? '#f6f6f4' : '#e6e6e2';
+        document.getElementById('tab-eff-bind').style.color = tab === 'bind' ? '#111' : '#6b6b6b';
         
         if(tab === 'bind') this.refreshBindList();
     },
@@ -28,7 +28,7 @@ window.effectSystem = {
         console.log("Loading effects from", files.length, "files/entries");
         
         const loadingMsg = document.createElement('div');
-        loadingMsg.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:20px;border-radius:10px;z-index:999;";
+        loadingMsg.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;color:#f6f6f4;padding:16px 18px;border-radius:0;border:1px solid #f6f6f4;font-family:Inter,sans-serif;z-index:999;";
         loadingMsg.innerText = "正在分析文件结构...";
         document.body.appendChild(loadingMsg);
 
@@ -259,22 +259,22 @@ window.effectSystem = {
             
             // 主容器
             const container = document.createElement('div');
-            container.style.cssText = "border-bottom:1px solid #333; margin-bottom:5px; background:#1a1a1a; border-radius:4px; overflow:hidden;";
+            container.style.cssText = "border-bottom:1px solid #111; margin-bottom:0; background:#fff; border-radius:0; overflow:hidden;";
             
             // 1. 顶部行 (缩略图 + 名字 + 按钮)
             const row = document.createElement('div');
             row.style.cssText = "padding:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;";
-            row.onmouseover = () => row.style.background = "#222";
+            row.onmouseover = () => row.style.background = "#f3e6ea";
             row.onmouseout = () => row.style.background = "transparent";
             
             // 缩略图
             const thumb = document.createElement('img');
             thumb.src = eff.frames[0].src;
-            thumb.style.cssText = "width:32px; height:32px; object-fit:contain; background:#000; margin-right:10px; border-radius:4px;";
+            thumb.style.cssText = "width:32px; height:32px; object-fit:contain; background:#f6f6f4; margin-right:10px; border-radius:0; border:1px solid #111;";
             
             const info = document.createElement('span');
             info.innerText = `${name} (${eff.frames.length}帧)`;
-            info.style.cssText = "color:#eee; font-size:13px; flex:1;";
+            info.style.cssText = "color:#111; font-size:13px; flex:1;";
             
             // 按钮组
             const right = document.createElement('div');
@@ -284,7 +284,7 @@ window.effectSystem = {
             const btnSettings = document.createElement('button');
             btnSettings.innerText = "⚙️";
             btnSettings.title = "设置属性 (Settings)";
-            btnSettings.style.cssText = "font-size:12px; padding:4px 6px; background:#444; color:#fff; border:none; border-radius:3px; cursor:pointer;";
+            btnSettings.style.cssText = "font-size:12px; padding:4px 6px; background:#fff; color:#111; border:1px solid #111; border-radius:0; cursor:pointer;";
             
             const btnPlay = document.createElement('button');
             
@@ -293,8 +293,9 @@ window.effectSystem = {
             
             btnPlay.innerText = isPreviewing ? "⏹" : "▶";
             btnPlay.title = isPreviewing ? "停止 (Stop)" : "预览 (Preview)";
-            const bg = isPreviewing ? "#d93" : "#2a9";
-            btnPlay.style.cssText = `font-size:12px; padding:4px 8px; background:${bg}; color:#fff; border:none; border-radius:3px; cursor:pointer; min-width:25px;`;
+            const bg = isPreviewing ? "#111" : "#fff";
+            const fg = isPreviewing ? "#fff" : "#111";
+            btnPlay.style.cssText = `font-size:12px; padding:4px 8px; background:${bg}; color:${fg}; border:1px solid #111; border-radius:0; cursor:pointer; min-width:25px;`;
             
                 btnPlay.onclick = (e) => { 
                     e.stopPropagation(); 
@@ -303,20 +304,22 @@ window.effectSystem = {
                         eff.previewInstanceId = null;
                         btnPlay.innerText = "▶";
                         btnPlay.title = "预览 (Preview)";
-                        btnPlay.style.background = "#2a9";
+                        btnPlay.style.background = "#fff";
+                        btnPlay.style.color = "#111";
                     } else {
                         // Start Loop Preview (maxLoop: -1 for infinite)
                         eff.previewInstanceId = this.play(name, 0, 0, 1, { maxLoop: -1, isPreview: true });
                         btnPlay.innerText = "⏹";
                         btnPlay.title = "停止 (Stop)";
-                        btnPlay.style.background = "#d93";
+                        btnPlay.style.background = "#111";
+                        btnPlay.style.color = "#fff";
                     }
                 };
 
             const btnDel = document.createElement('button');
             btnDel.innerText = "🗑";
             btnDel.title = "删除 (Delete)";
-            btnDel.style.cssText = "font-size:12px; padding:4px 6px; background:#a33; color:#fff; border:none; border-radius:3px; cursor:pointer;";
+            btnDel.style.cssText = "font-size:12px; padding:4px 6px; background:#fff; color:#111; border:1px solid #111; border-radius:0; cursor:pointer;";
             btnDel.onclick = (e) => {
                 e.stopPropagation();
                 if(confirm('确定删除特效 ' + name + ' 吗？')) {
@@ -341,7 +344,7 @@ window.effectSystem = {
             
             // 2. 设置面板 (折叠)
             const settingsPanel = document.createElement('div');
-            settingsPanel.style.cssText = "display:none; padding:10px; background:#252525; border-top:1px solid #333; font-size:12px;";
+            settingsPanel.style.cssText = "display:none; padding:10px; background:#f6f6f4; border-top:1px solid #111; font-size:12px; color:#111;";
             
             // Helper for inputs with slider
             const createInputRow = (label, key, type='number', step=1, min=null, max=null) => {
@@ -353,7 +356,7 @@ window.effectSystem = {
                 
                 const l = document.createElement('label');
                 l.innerText = label;
-                l.style.color = "#aaa";
+                l.style.color = "#6b6b6b";
                 l.style.fontSize = "12px";
                 
                 // 改为 text 类型以移除默认上下箭头
@@ -363,7 +366,7 @@ window.effectSystem = {
                 inp.value = initVal;
                 // 移除 step/min/max 属性在 text 类型上无用，逻辑由 JS 控制
                 // 输入框样式
-                inp.style.cssText = "width:50px; background:#333; border:1px solid #555; color:#fff; padding:2px; border-radius:3px; text-align:right; font-size:12px;";
+                inp.style.cssText = "width:50px; background:#fff; border:1px solid #111; color:#111; padding:2px; border-radius:0; text-align:right; font-size:12px;";
                 
                 // 滑块
                 const slider = document.createElement('input');
@@ -479,16 +482,16 @@ window.effectSystem = {
 
         // 添加刷新按钮行
         const headerRow = document.createElement('div');
-        headerRow.style.cssText = "padding:10px; text-align:center; border-bottom:1px solid #333; margin-bottom:5px;";
+        headerRow.style.cssText = "padding:10px; text-align:center; border-bottom:1px solid #111; margin-bottom:5px;";
         const btnRefresh = document.createElement('button');
         
         // 动态设置文本
         const hasEvents = this.currentEvents.length > 0;
         btnRefresh.innerText = hasEvents ? "🔄 重新扫描事件" : "🔍 扫描事件";
         
-        btnRefresh.style.cssText = "font-size:14px; padding:8px 20px; background:#4466aa; color:#fff; border:none; cursor:pointer; border-radius:4px; font-weight:bold; transition: background 0.2s;";
-        btnRefresh.onmouseover = () => btnRefresh.style.background = "#5577bb";
-        btnRefresh.onmouseout = () => btnRefresh.style.background = "#4466aa";
+        btnRefresh.style.cssText = "font-size:13px; padding:8px 20px; background:#111; color:#f6f6f4; border:1px solid #111; cursor:pointer; border-radius:0; font-weight:600;";
+        btnRefresh.onmouseover = () => btnRefresh.style.background = "#000";
+        btnRefresh.onmouseout = () => btnRefresh.style.background = "#111";
         
         btnRefresh.onclick = () => {
             this.scanEvents();

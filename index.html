@@ -10,50 +10,38 @@
     <link rel="icon" type="image/png" sizes="16x16" href="%BASE_URL%favicon-16.png">
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png">
     <style>
-        html, body { margin: 0; background: #111; }
+        html, body { margin: 0; background: #f6f6f4; }
         #ui, #controls, #file-panel, #effect-panel, #export-modal, #sheet-modal { display: none; }
     </style>
     <script src="%BASE_URL%vendor/gif/gif.js"></script>
 </head>
 <body>
 <div id="drop-zone">
-    <!-- 支持用户自定义 Logo：请将您的图片命名为 icon.png 放入同级目录 -->
-    <img src="%BASE_URL%vendor/icon.png" class="logo-icon" onerror="this.style.display='none'; document.getElementById('default-logo').style.display='block';" alt="Logo">
-    <div id="default-logo" class="logo-icon" style="display:none; font-size:120px; line-height: 1;">💎</div>
-    
-    <h1>
-        <span style="position: relative; display: inline-block;">
-            播放器
-            <span style="
-                position: absolute;
-                top: -5px;
-                right: -42px;
-                font-size: 14px;
-                line-height: 1.2;
-                background: linear-gradient(135deg, #00e5ff 0%, #2979ff 100%); 
-                color: #fff; 
-                -webkit-text-fill-color: currentColor;
-                -webkit-background-clip: border-box;
-                padding: 2px 6px; 
-                border-radius: 6px; 
-                font-weight: 800; 
-                box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
-                letter-spacing: 0;
-                font-family: Arial, sans-serif;
-                white-space: nowrap;
-            ">3.0</span>
-        </span>
-    </h1>
-    <p style="color:#666; margin-bottom:30px; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; font-weight: 300;">Universal Spine Viewer</p>
-    
-    <div id="web-input">
-        <input type="file" id="folder-input" webkitdirectory directory style="display:none">
-        <input type="file" id="files-input" multiple accept=".json,.json.txt,.skel,.skel.bytes,.atlas,.atlas.txt,.png,.jpg,.jpeg,.webp" style="display:none">
-        <button class="btn-folder" onclick="document.getElementById('folder-input').click()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开动画文件夹</span></button>
+    <header class="splash-bar">
+        <span class="splash-brand">Spine查看器</span>
+        <p class="eyebrow">Universal Spine Viewer</p>
+    </header>
+    <div class="splash-hero">
+        <!-- 支持用户自定义 Logo：请将您的图片命名为 icon.png 放入同级目录 -->
+        <img src="%BASE_URL%vendor/icon.png" class="logo-icon" onerror="this.style.display='none'; document.getElementById('default-logo').style.display='block';" alt="Logo">
+        <div id="default-logo" class="logo-icon" style="display:none; font-size:96px; line-height: 1;">💎</div>
     </div>
-    <div id="native-input" style="display:none;">
-        <button class="btn-folder" onclick="openNativeFolder()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开本地文件夹</span></button>
-    </div>
+    <section class="splash-rose marks">
+        <h1>
+            <span class="splash-title-row">
+                <span class="splash-title">播放器</span>
+                <span class="ver-badge">3.0</span>
+            </span>
+        </h1>
+        <div id="web-input">
+            <input type="file" id="folder-input" webkitdirectory directory style="display:none">
+            <input type="file" id="files-input" multiple accept=".json,.json.txt,.skel,.skel.bytes,.atlas,.atlas.txt,.png,.jpg,.jpeg,.webp" style="display:none">
+            <button class="btn-folder" onclick="document.getElementById('folder-input').click()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开动画文件夹</span></button>
+        </div>
+        <div id="native-input" style="display:none;">
+            <button class="btn-folder" onclick="openNativeFolder()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开本地文件夹</span></button>
+        </div>
+    </section>
 </div>
 
 <div id="log">等待文件...</div>
@@ -78,7 +66,7 @@
 </div>
 
     <!-- 特效管理面板 (重构版 - 可拖动 + 右侧定位) -->
-    <div id="effect-panel" class="panel" style="position:fixed; top:auto; bottom:120px; right:320px; width:600px; height:520px; display:none; z-index:200; flex-direction:column; padding:0; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform-origin: bottom right;">
+    <div id="effect-panel" class="panel marks" style="position:fixed; top:auto; bottom:120px; right:320px; width:600px; height:520px; display:none; z-index:200; flex-direction:column; padding:0; overflow:hidden; transform-origin: bottom right;">
         
         <!-- 顶部标题栏 (添加 ID 用于拖动句柄) -->
         <div id="effect-panel-header" style="background:rgba(0,0,0,0.5); padding:10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; cursor: move; user-select: none;">
@@ -89,13 +77,13 @@
         </div>
 
         <!-- Tab 切换 -->
-        <div style="display:flex; background:#222; border-bottom:1px solid #444;">
-            <div id="tab-eff-res" onclick="window.effectSystem.switchTab('res')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#fff; background:#333; font-weight:bold; border-right:1px solid #444;">1. 特效资源库</div>
-            <div id="tab-eff-bind" onclick="window.effectSystem.switchTab('bind')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#888;">2. 事件绑定配置</div>
+        <div class="eff-tabs" style="display:flex; background:#e6e6e2; border-bottom:1px solid #111;">
+            <div id="tab-eff-res" onclick="window.effectSystem.switchTab('res')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#111; background:#f6f6f4; font-weight:600; border-right:1px solid #111;">1. 特效资源库</div>
+            <div id="tab-eff-bind" onclick="window.effectSystem.switchTab('bind')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#6b6b6b; background:#e6e6e2;">2. 事件绑定配置</div>
         </div>
 
         <!-- 内容区域 -->
-        <div style="flex:1; position:relative; overflow:hidden; background:rgba(30,30,30,0.95);">
+        <div style="flex:1; position:relative; overflow:hidden; background:#f6f6f4;">
             
             <!-- 1. 资源库页面 -->
             <div id="page-eff-res" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; padding:15px; box-sizing:border-box;">
@@ -139,7 +127,7 @@
         <div id="effect-resize-handle" style="position:absolute; bottom:0; right:0; width:25px; height:25px; cursor:nwse-resize; z-index:20; background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%);"></div>
     </div>
     
-    <div id="file-panel" class="panel">
+    <div id="file-panel" class="panel marks">
         <div class="load-actions">
             <button type="button" onclick="document.getElementById('folder-input').click()">📂 追加文件夹</button>
             <button type="button" title="在同一次选择里选中 .json 或 .skel，以及这一套的 .atlas 和贴图。没选中的同目录文件页面读不到。" onclick="document.getElementById('files-input').click()">＋ 添加单个</button>
@@ -209,7 +197,7 @@
     </div>
 </div>
 
-<div id="ui" class="panel">
+<div id="ui" class="panel marks">
 
     <div class="ui-group open">
         <div class="ui-header" onclick="toggleGroup(this)">
@@ -315,7 +303,7 @@
         <div class="ui-content">
              <!-- 控制栏 -->
             <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:8px;">
-                <button onclick="document.getElementById('effect-panel').style.display='flex'" class="btn-shine" style="width:100%; padding:12px; margin-bottom:5px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#fff; background: linear-gradient(45deg, #ff357a, #fff172); box-shadow: 0 4px 15px rgba(255, 53, 122, 0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: transform 0.2s, box-shadow 0.2s;">
+                <button onclick="document.getElementById('effect-panel').style.display='flex'" class="btn-shine" style="width:100%; padding:12px; margin-bottom:5px; cursor:pointer; font-size:13px;">
                     ✨ 管理特效 / 绑定 (Manage Effects)
                 </button>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -464,7 +452,7 @@
     <p id="export-status" style="color:#aaa; margin-top:10px;">0 / 0</p>
 </div>
 
-<div id="controls" class="panel">
+<div id="controls" class="panel marks">
     <div class="play-row">
         <button id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
         <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
@@ -521,7 +509,7 @@
 
     <!-- 精灵图切分配置弹窗 -->
     <div id="sheet-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
-        <div style="background:#222; padding:20px; border-radius:8px; width:400px; box-shadow:0 0 20px rgba(0,0,0,0.8); border:1px solid #444;">
+        <div class="modal-card marks" style="background-color:#f6f6f4; padding:20px; width:400px; border:1px solid #111;">
             <h3 style="margin:0 0 15px 0; color:#fff;">📐 精灵图切分配置</h3>
             
             <div style="display:flex; gap:15px; margin-bottom:15px;">
