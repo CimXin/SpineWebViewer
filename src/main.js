@@ -3,6 +3,7 @@ import "./styles/app.css";
 import globalsUrl from "./state/globals.js?url";
 import uiUtilsUrl from "./ui/ui-utils.js?url";
 import debugUrl from "./viewer/debug-renderer.js?url";
+import boneTreeUrl from "./viewer/bone-tree.js?url";
 import animControlUrl from "./viewer/anim-control.js?url";
 import viewUrl from "./viewer/view-manager.js?url";
 import configUrl from "./config/config-manager.js?url";
@@ -32,6 +33,7 @@ const scripts = [
     globalsUrl,
     uiUtilsUrl,
     debugUrl,
+    boneTreeUrl,
     animControlUrl,
     viewUrl,
     configUrl,

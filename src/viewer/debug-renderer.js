@@ -42,7 +42,9 @@ window.debugRenderer = {
         const c = window.viewerConfig.debugCanvas;
         const showBones = !!(window.viewerConfig.showBones && skeleton);
         const showOrigin = window.viewerConfig.showOrigin !== false && !!skeleton;
-        if(!ctx || !c || (!showBones && !showOrigin)) {
+        const highlightName = skeleton && window.viewerConfig.highlightBone;
+        const showHighlight = !!highlightName;
+        if(!ctx || !c || (!showBones && !showOrigin && !showHighlight)) {
             if(ctx && c) ctx.clearRect(0, 0, c.width, c.height);
             return;
         }
@@ -60,8 +62,10 @@ window.debugRenderer = {
         if (showOrigin) this.drawOriginAxes(ctx, skeleton, zoom);
 
         if (!showBones) {
+            if (showHighlight) this.drawBoneHighlight(ctx, skeleton, highlightName, zoom);
             ctx.restore();
-            this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
+            if (showOrigin) this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
+            if (showHighlight) this.drawBoneHighlightLabel(ctx, c, skeleton, highlightName, camX, camY, zoom);
             return;
         }
 
@@ -167,8 +171,71 @@ window.debugRenderer = {
                 ctx.fill();
             }
         }
+        if (showHighlight) this.drawBoneHighlight(ctx, skeleton, highlightName, zoom);
         ctx.restore();
         if (showOrigin) this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
+        if (showHighlight) this.drawBoneHighlightLabel(ctx, c, skeleton, highlightName, camX, camY, zoom);
+    },
+    findBone: function(skeleton, name) {
+        if (!skeleton || !skeleton.bones || !name) return null;
+        for (let i = 0; i < skeleton.bones.length; i++) {
+            const bone = skeleton.bones[i];
+            const boneName = bone.data && bone.data.name ? bone.data.name : bone.name;
+            if (boneName === name) return bone;
+        }
+        return null;
+    },
+    boneRotationDeg: function(bone) {
+        if (typeof bone.getWorldRotationX === "function") {
+            const deg = bone.getWorldRotationX();
+            if (Number.isFinite(deg)) return deg;
+        }
+        if (Number.isFinite(bone.worldRotation)) return bone.worldRotation;
+        return null;
+    },
+    drawBoneHighlight: function(ctx, skeleton, name, zoom) {
+        const bone = this.findBone(skeleton, name);
+        if (!bone || !Number.isFinite(bone.worldX) || !Number.isFinite(bone.worldY)) return;
+        const z = zoom || 1;
+        const x = bone.worldX;
+        const y = bone.worldY;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, 14 / z, 0, Math.PI * 2);
+        ctx.lineWidth = 3 / z;
+        ctx.strokeStyle = "#ffe14a";
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x, y, 4 / z, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffe14a";
+        ctx.fill();
+        const deg = this.boneRotationDeg(bone);
+        if (deg != null) {
+            const rad = deg * Math.PI / 180;
+            const len = bone.data && bone.data.length > 0 ? bone.data.length : 28 / z;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(rad) * len, y + Math.sin(rad) * len);
+            ctx.lineWidth = 2.5 / z;
+            ctx.strokeStyle = "#ffe14a";
+            ctx.stroke();
+        }
+        ctx.restore();
+    },
+    drawBoneHighlightLabel: function(ctx, c, skeleton, name, camX, camY, zoom) {
+        const bone = this.findBone(skeleton, name);
+        if (!bone || !Number.isFinite(bone.worldX) || !Number.isFinite(bone.worldY)) return;
+        const sx = c.width / 2 + (bone.worldX - camX) * zoom;
+        const sy = c.height / 2 - (bone.worldY - camY) * zoom;
+        ctx.save();
+        ctx.font = "bold 12px sans-serif";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(0,0,0,0.75)";
+        ctx.lineJoin = "round";
+        ctx.strokeText(name, sx + 16, sy - 10);
+        ctx.fillStyle = "#ffe14a";
+        ctx.fillText(name, sx + 16, sy - 10);
+        ctx.restore();
     },
     drawOriginAxes: function(ctx, skeleton, zoom) {
         const ox = skeleton.x || 0;

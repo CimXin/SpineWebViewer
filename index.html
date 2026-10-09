@@ -291,6 +291,17 @@
         </div>
     </div>
 
+    <div class="ui-group open">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title">🌳 骨骼层级 (Hierarchy)</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="bone-tree-hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
+            <div id="bone-tree" class="bone-tree">未加载骨架</div>
+        </div>
+    </div>
+
     <!-- 3. 事件监视器 (默认关闭) -->
     <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
