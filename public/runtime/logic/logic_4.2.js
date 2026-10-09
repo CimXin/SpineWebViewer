@@ -198,6 +198,11 @@ window.startSpine42 = async function(canvas, files) {
                 if(window.viewerConfig.currentLoadId !== myLoadId) return;
                 processSpine(map, img);
             };
+            img.onerror = () => {
+                URL.revokeObjectURL(imgBlob);
+                if(window.viewerConfig.currentLoadId !== myLoadId) return;
+                ui.log("贴图解码失败");
+            };
             ui.log("正在解码贴图…");
             img.src = imgBlob;
         } catch(e) { ui.log(e, 'err'); }

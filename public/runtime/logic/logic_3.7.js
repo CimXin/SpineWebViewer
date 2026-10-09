@@ -65,7 +65,11 @@ async function loadFiles37(files) {
         img.onload = async () => {
             URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
-            if(!gl || gl.isContextLost()) return;
+            if(!gl || gl.isContextLost()) {
+                if (window.log) window.log("加载失败: WebGL 上下文已丢失");
+                return;
+            }
+            try {
             
             // 根据用户设置决定是否让 WebGL 自动预乘 Alpha
             const unpack = window.viewerConfig.unpackEnabled || false;
@@ -83,6 +87,7 @@ async function loadFiles37(files) {
             
             if(map.type === 'binary') {
                 alert("Spine 3.7 WebGL 官方运行时不支持二进制 (.skel) 文件。\n请使用 JSON 格式导出，或转换为 JSON。");
+                if (window.log) window.log("加载失败: 3.7 不支持二进制，请改用 JSON");
                 return;
             } else {
                 const text = await readFileAsText(map.main);
@@ -100,13 +105,30 @@ async function loadFiles37(files) {
             
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render37();
+                const ver = skeletonData && skeletonData.version;
+                if (window.log) window.log(ver ? `版本: ${ver}` : "加载完成");
+            } catch (e) {
+                console.error(e);
+                const msg = "加载失败: " + (e && e.message ? e.message : e);
+                if (window.log) window.log(msg);
+                alert(msg);
+            }
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(imgUrl);
+            if (window.viewerConfig.currentLoadId !== myLoadId) return;
+            const msg = "贴图解码失败";
+            if (window.log) window.log(msg);
+            alert(msg);
         };
         if (window.log) window.log('正在解码贴图…');
         img.src = imgUrl;
 
     } catch(e) {
-        alert("3.7 加载错误: " + e);
         console.error(e);
+        const msg = "3.7 加载错误: " + (e && e.message ? e.message : e);
+        if (window.log) window.log(msg);
+        alert(msg);
     }
 }
 
