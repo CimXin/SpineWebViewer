@@ -4,6 +4,14 @@
 
 运行时不是把旧压缩包里的 `spine-webgl-*.js` 原样塞进仓库，而是按版本从 Esoteric Software 的官方发布拉取。版本适配器（`public/runtime/logic/`）仍沿用参考播放器里针对各版本 WebGL API 的加载与渲染代码。
 
+## 在线预览
+
+<https://cimxin.github.io/SpineWebViewer/>
+
+推送到 `main` 后，GitHub Actions（`.github/workflows/pages.yml`）会执行 `npm ci` 和 `npm run build`，把 `dist/` 部署到 GitHub Pages。这次构建的 Vite `base` 是 `/SpineWebViewer/`，脚本、样式和 Spine 运行时都从该子路径加载。本机的 `npm run build` 和发布压缩包不设置 `PAGES_BASE`，仍然使用相对路径 `./`，解压到任意目录后用启动脚本打开即可。
+
+如果部署成功但站点打不开，打开仓库 **Settings → Pages → Build and deployment**，把 **Source** 选成 **GitHub Actions**。
+
 ## 下载后直接使用
 
 发布包：<https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.8/SpineWebViewer-v1.0.8.zip>
