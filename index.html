@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spine查看器</title>
+    <script>
+        try {
+            if (localStorage.getItem("spine-viewer-lang") === "en") {
+                document.documentElement.lang = "en";
+                document.title = "Spine Viewer";
+            }
+        } catch (e) {}
+    </script>
     <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml">
     <link rel="icon" href="%BASE_URL%favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%favicon-32.png">
@@ -18,7 +26,7 @@
 <body>
 <div id="drop-zone">
     <header class="splash-bar">
-        <span class="splash-brand">Spine查看器</span>
+        <span class="splash-brand" data-i18n="splash.brand">Spine查看器</span>
         <p class="eyebrow">Universal Spine Viewer</p>
     </header>
     <div class="splash-hero">
@@ -29,22 +37,22 @@
     <section class="splash-rose marks">
         <h1>
             <span class="splash-title-row">
-                <span class="splash-title">播放器</span>
+                <span class="splash-title" data-i18n="splash.player">播放器</span>
                 <span class="ver-badge">3.0</span>
             </span>
         </h1>
         <div id="web-input">
             <input type="file" id="folder-input" webkitdirectory directory style="display:none">
             <input type="file" id="files-input" multiple accept=".json,.json.txt,.skel,.skel.bytes,.atlas,.atlas.txt,.png,.jpg,.jpeg,.webp" style="display:none">
-            <button class="btn-folder" onclick="document.getElementById('folder-input').click()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开动画文件夹</span></button>
+            <button class="btn-folder" onclick="document.getElementById('folder-input').click()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span data-i18n="splash.openFolder">打开动画文件夹</span></button>
         </div>
         <div id="native-input" style="display:none;">
-            <button class="btn-folder" onclick="openNativeFolder()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span>打开本地文件夹</span></button>
+            <button class="btn-folder" onclick="openNativeFolder()"><span class="btn-folder-icon" aria-hidden="true">📂</span><span data-i18n="splash.openLocal">打开本地文件夹</span></button>
         </div>
     </section>
 </div>
 
-<div id="log">等待文件...</div>
+<div id="log" data-i18n="status.wait">等待文件...</div>
 
 <div id="canvas-wrapper">
     <!-- 背景参考图层 -->
@@ -65,8 +73,8 @@
     <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 </div>
 
-<label id="origin-overlay" class="origin-overlay" title="原点坐标轴">
-    <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴">
+<label id="origin-overlay" class="origin-overlay" title="原点坐标轴" data-i18n-title="origin.title">
+    <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴" data-i18n-aria="origin.title">
     <svg class="origin-icon" viewBox="0 0 20 20" aria-hidden="true">
         <path fill="currentColor" d="M2 9h12v2H2z"/>
         <path fill="currentColor" d="M9 6h2v12H9z"/>
@@ -81,15 +89,15 @@
         <!-- 顶部标题栏 (添加 ID 用于拖动句柄) -->
         <div id="effect-panel-header" style="background:rgba(0,0,0,0.5); padding:10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; cursor: move; user-select: none;">
             <div class="effect-title" style="font-weight:bold; display:flex; align-items:center; gap:10px;">
-                <span>⚡ 特效管理器</span>
+                <span data-i18n="fx.title">⚡ 特效管理器</span>
             </div>
             <button onclick="document.getElementById('effect-panel').style.display='none'" style="background:none; color:#aaa; font-size:18px; padding:0; cursor: pointer;">×</button>
         </div>
 
         <!-- Tab 切换 -->
         <div class="eff-tabs" style="display:flex; background:#e6e6e2; border-bottom:1px solid #111;">
-            <div id="tab-eff-res" onclick="window.effectSystem.switchTab('res')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#111; background:#f6f6f4; font-weight:600; border-right:1px solid #111;">1. 特效资源库</div>
-            <div id="tab-eff-bind" onclick="window.effectSystem.switchTab('bind')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#6b6b6b; background:#e6e6e2;">2. 事件绑定配置</div>
+            <div id="tab-eff-res" onclick="window.effectSystem.switchTab('res')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#111; background:#f6f6f4; font-weight:600; border-right:1px solid #111;" data-i18n="fx.tabRes">1. 特效资源库</div>
+            <div id="tab-eff-bind" onclick="window.effectSystem.switchTab('bind')" style="flex:1; text-align:center; padding:10px; cursor:pointer; color:#6b6b6b; background:#e6e6e2;" data-i18n="fx.tabBind">2. 事件绑定配置</div>
         </div>
 
         <!-- 内容区域 -->
@@ -97,37 +105,36 @@
             
             <!-- 1. 资源库页面 -->
             <div id="page-eff-res" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; padding:15px; box-sizing:border-box;">
-                <button onclick="document.getElementById('effect-upload').click()" class="btn-folder" style="margin:0 0 5px 0; padding:10px; font-size:14px; width:100%;">
+                <button onclick="document.getElementById('effect-upload').click()" class="btn-folder" style="margin:0 0 5px 0; padding:10px; font-size:14px; width:100%;" data-i18n="fx.importSeq">
                     📂 导入序列帧文件夹
                 </button>
                 <input type="file" id="effect-upload" webkitdirectory style="display:none" onchange="window.effectSystem.loadEffectFromFiles(this.files)">
                 
-                <button onclick="document.getElementById('sprite-sheet-upload').click()" class="btn-folder" style="margin:0 0 15px 0; padding:10px; font-size:14px; width:100%; background:#4466aa;">
+                <button onclick="document.getElementById('sprite-sheet-upload').click()" class="btn-folder" style="margin:0 0 15px 0; padding:10px; font-size:14px; width:100%; background:#4466aa;" data-i18n="fx.importSheet">
                     🖼️ 导入精灵图 (Sprite Sheet)
                 </button>
                 <input type="file" id="sprite-sheet-upload" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="window.effectSystem.openSheetConfig(this.files[0])">
 
-                <div style="font-size:12px; color:#888; margin-bottom:5px;">已导入的特效 (点击 ▶ 预览):</div>
+                <div style="font-size:12px; color:#888; margin-bottom:5px;" data-i18n="fx.imported">已导入的特效 (点击 ▶ 预览):</div>
                 <div id="effect-res-list" style="flex:1; background:#111; border:1px solid #444; border-radius:4px; overflow-y:auto;">
-                    <!-- 动态生成 -->
-                    <div style="padding:20px; text-align:center; color:#555;">暂无特效，请点击上方按钮导入</div>
+                    <div data-i18n="fx.emptyImport" style="padding:20px; text-align:center; color:#555;">暂无特效，请点击上方按钮导入</div>
                 </div>
             </div>
 
             <!-- 2. 绑定配置页面 -->
             <div id="page-eff-bind" style="position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; padding:15px; box-sizing:border-box;">
                 <div style="font-size:12px; color:#888; margin-bottom:10px; display:flex; justify-content:space-between;">
-                    <span>检测到的骨架事件 (Event)</span>
-                    <span>绑定动作 (Action)</span>
+                    <span data-i18n="fx.events">检测到的骨架事件 (Event)</span>
+                    <span data-i18n="fx.actions">绑定动作 (Action)</span>
                 </div>
                 
                 <div id="effect-bind-list" style="flex:1; background:#111; border:1px solid #444; border-radius:4px; overflow-y:auto;">
                     <!-- 动态生成 -->
-                    <div style="padding:20px; text-align:center; color:#555;">未检测到事件，或者未加载模型</div>
+                    <div data-i18n="fx.noEvents" style="padding:20px; text-align:center; color:#555;">未检测到事件，或者未加载模型</div>
                 </div>
                 
                 <div style="margin-top:10px; font-size:11px; color:#666; text-align:center;">
-                    * 绑定后，播放动画时触发对应事件即可自动播放特效
+                    <span data-i18n="fx.bindHint">* 绑定后，播放动画时触发对应事件即可自动播放特效</span>
                 </div>
             </div>
             
@@ -139,28 +146,28 @@
     
     <div id="file-panel" class="panel marks">
         <div class="load-actions">
-            <button type="button" onclick="document.getElementById('folder-input').click()">📂 追加文件夹</button>
-            <button type="button" title="在同一次选择里选中 .json 或 .skel，以及这一套的 .atlas 和贴图。没选中的同目录文件页面读不到。" onclick="document.getElementById('files-input').click()">＋ 添加单个</button>
-            <button type="button" onclick="clearSpineList()">清空列表</button>
+            <button type="button" onclick="document.getElementById('folder-input').click()" data-i18n="file.addFolder">📂 追加文件夹</button>
+            <button type="button" title="在同一次选择里选中 .json 或 .skel，以及这一套的 .atlas 和贴图。没选中的同目录文件页面读不到。" data-i18n-title="file.addOneTip" onclick="document.getElementById('files-input').click()" data-i18n="file.addOne">＋ 添加单个</button>
+            <button type="button" onclick="clearSpineList()" data-i18n="file.clear">清空列表</button>
         </div>
         
         <div id="file-list-container" style="display:none; margin-bottom:15px;">
-            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">已加载的骨架（再次添加会追加）:</label>
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;" data-i18n="file.loaded">已加载的骨架（再次添加会追加）:</label>
             
             <!-- 标签页切换 -->
             <div class="file-tab-container">
-                <div class="file-tab active" id="tab-all" onclick="switchFileTab('all')">全部文件</div>
-                <div class="file-tab" id="tab-fav" onclick="switchFileTab('fav')">★ 我的收藏</div>
+                <div class="file-tab active" id="tab-all" onclick="switchFileTab('all')" data-i18n="file.all">全部文件</div>
+                <div class="file-tab" id="tab-fav" onclick="switchFileTab('fav')" data-i18n="file.fav">★ 我的收藏</div>
             </div>
 
             <!-- 搜索框与视图切换 -->
             <div style="display:flex; align-items:center; gap:5px; margin-bottom: 5px;">
                 <div style="position:relative; flex:1;">
-                    <input type="text" id="spine-file-search" placeholder="🔍 搜索文件名..." oninput="filterSpineFiles(this.value)" style="padding-right: 30px;">
+                    <input type="text" id="spine-file-search" placeholder="🔍 搜索文件名..." data-i18n-placeholder="file.search" oninput="filterSpineFiles(this.value)" style="padding-right: 30px;">
                     <span id="search-count" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:#666; pointer-events:none;"></span>
                 </div>
                 <!-- 移除了原来的星星按钮，功能转移到 Tab -->
-                <button onclick="toggleFileView()" id="btn-view-mode" style="width:30px; height:30px; background:#333; color:#aaa; font-size:16px; padding:0;" title="切换视图模式 (列表/预览)">≣</button>
+                <button onclick="toggleFileView()" id="btn-view-mode" style="width:30px; height:30px; background:#333; color:#aaa; font-size:16px; padding:0;" title="切换视图模式 (列表/预览)" data-i18n-title="file.view">≣</button>
             </div>
             
             <!-- 自定义带缩略图的列表 (默认列表模式) -->
@@ -173,9 +180,9 @@
         <div class="divider"></div>
     
     <div style="margin-top:5px;">
-        <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">导出序列帧:</label>
+        <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;" data-i18n="export.label">导出序列帧:</label>
         <div style="display:flex; gap:8px;">
-            <input type="text" id="export-prefix" value="anim" placeholder="前缀">
+            <input type="text" id="export-prefix" value="anim" placeholder="前缀" data-i18n-placeholder="export.prefix">
             <select id="export-digits" style="width:70px;">
                 <option value="2">00</option>
                 <option value="3" selected>000</option>
@@ -184,26 +191,26 @@
         </div>
         
         <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-            <label style="color:#aaa; font-size:12px; white-space:nowrap;">格式:</label>
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;" data-i18n="export.format">格式:</label>
             <select id="export-format" style="width:100%; background:#222; border:1px solid #444; color:#eee; border-radius:4px;">
-                <option value="png">PNG 序列帧 (默认)</option>
-                <option value="gif">GIF 动图 (支持透明)</option>
+                <option value="png" data-i18n="export.png">PNG 序列帧 (默认)</option>
+                <option value="gif" data-i18n="export.gif">GIF 动图 (支持透明)</option>
             </select>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-            <label style="color:#aaa; font-size:12px; white-space:nowrap;">缩放:</label>
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;" data-i18n="export.scale">缩放:</label>
             <input type="number" id="export-scale" value="1.0" step="0.1" min="0.1" max="5.0" style="background:#222; border:1px solid #444; color:#fff; padding:4px; border-radius:4px; width:100%;">
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-            <label style="color:#aaa; font-size:12px; white-space:nowrap;">批量:</label>
+            <label style="color:#aaa; font-size:12px; white-space:nowrap;" data-i18n="export.batch">批量:</label>
             <label style="color:#eee; font-size:12px; display:flex; align-items:center; cursor:pointer;">
-                <input type="checkbox" id="export-batch" style="width:16px; height:16px; margin-right:5px;"> 导出所有动作
+                <input type="checkbox" id="export-batch" style="width:16px; height:16px; margin-right:5px;"> <span data-i18n="export.batchAll">导出所有动作</span>
             </label>
         </div>
 
-        <button onclick="exportSequence()" class="btn-export">📂 选择文件夹并导出</button>
+        <button onclick="exportSequence()" class="btn-export" data-i18n="export.choose">📂 选择文件夹并导出</button>
     </div>
 </div>
 
@@ -212,22 +219,22 @@
     <!-- 1. 动画模块 (默认打开) -->
     <div class="ui-group open">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">🎬 动画 (Animation)</span>
+            <span class="ui-title" data-i18n="anim.title">🎬 动画</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
             <div style="margin-bottom:15px;">
-                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;">主动画 (Track 0)</label>
+                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;" data-i18n="anim.track0">主动画 (Track 0)</label>
                 <select id="anim-select"></select>
                 
                 <div id="extra-tracks-container" style="margin-top:8px;"></div>
                 <button onclick="addTrack()" style="width:100%; margin-top:8px; padding:6px; background:#333; font-size:12px; color:#aaa; border:1px dashed #555; border-radius:4px; cursor:pointer; transition:all 0.2s;">
-                    ➕ 添加叠加轨道 (Add Track)
+                    <span data-i18n="anim.addTrack">➕ 添加叠加轨道</span>
                 </button>
             </div>
             
             <div style="margin-bottom:15px;">
-                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;">选择皮肤</label>
+                <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;" data-i18n="anim.skin">选择皮肤</label>
                 <!-- 4.1 / 4.2 使用传统下拉菜单 -->
                 <select id="skin-select" style="display:block;"></select>
                 <!-- 3.8 使用混搭列表 -->
@@ -237,12 +244,12 @@
             <div class="divider"></div>
 
             <div class="control-row">
-                <label>预乘 Alpha (PMA)</label>
+                <label data-i18n="anim.pma">预乘 Alpha (PMA)</label>
                 <div style="display:flex; gap:10px;">
-                     <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，图片加载时不进行预乘（因为图片已经预乘过了），渲染时使用 One 混合模式。">
+                     <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，图片加载时不进行预乘（因为图片已经预乘过了），渲染时使用 One 混合模式。" data-i18n-title="anim.pmaTip">
                         <input type="checkbox" id="chk-pma" onchange="window.togglePMA(this.checked)"> PMA
                     </label>
-                    <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，让 WebGL 在加载图片时自动乘上 Alpha。通常用于直通(Straight)导出的图片。">
+                    <label style="font-size:12px; display:flex; align-items:center; cursor:pointer;" title="开启后，让 WebGL 在加载图片时自动乘上 Alpha。通常用于直通(Straight)导出的图片。" data-i18n-title="anim.unpackTip">
                         <input type="checkbox" id="chk-unpack" onchange="window.toggleUnpack(this.checked)"> Unpack
                     </label>
                 </div>
@@ -253,17 +260,17 @@
     <!-- 2. 骨骼显示模块 (默认关闭) -->
     <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">💀 骨骼显示 (Bones)</span>
+            <span class="ui-title" data-i18n="bone.title">💀 骨骼显示</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
              <div class="control-row">
-                <label>显示骨骼</label>
+                <label data-i18n="bone.show">显示骨骼</label>
                 <input type="checkbox" id="chk-bones" onchange="window.viewerConfig.showBones = this.checked">
             </div>
             
             <div class="control-row">
-                <label>骨骼颜色</label>
+                <label data-i18n="bone.color">骨骼颜色</label>
                 <div class="color-group">
                     <div class="color-preset" onclick="setBoneColor('#00ff00')" style="background:#00ff00;"></div>
                     <div class="color-preset" onclick="setBoneColor('#00ccff')" style="background:#00ccff;"></div>
@@ -274,7 +281,7 @@
             </div>
 
             <div class="control-row">
-                <label>骨骼粗细</label>
+                <label data-i18n="bone.width">骨骼粗细</label>
                 <input type="range" id="bone-scale" min="0.5" max="3.0" step="0.1" value="1.0" style="width:120px;">
             </div>
         </div>
@@ -282,49 +289,49 @@
 
     <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">🌳 骨骼层级 (Hierarchy)</span>
+            <span class="ui-title" data-i18n="hier.title">🌳 骨骼层级</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
-            <p class="bone-tree-hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
-            <div id="bone-tree" class="bone-tree">未加载骨架</div>
+            <p class="bone-tree-hint" data-i18n="hier.hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
+            <div id="bone-tree" class="bone-tree" data-i18n="hier.empty">未加载骨架</div>
         </div>
     </div>
 
     <!-- 3. 事件监视器 (默认关闭) -->
     <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">⚡ 事件监视器 (Events)</span>
+            <span class="ui-title" data-i18n="event.title">⚡ 事件监视器</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
              <!-- 控制栏 -->
             <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px; border-bottom:1px solid #444; padding-bottom:8px;">
                 <button onclick="document.getElementById('effect-panel').style.display='flex'" class="btn-shine" style="width:100%; padding:12px; margin-bottom:5px; cursor:pointer; font-size:13px;">
-                    ✨ 管理特效 / 绑定 (Manage Effects)
+                    <span data-i18n="event.manage">✨ 管理特效 / 绑定</span>
                 </button>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <label style="font-size:12px; color:#aaa; display:flex; align-items:center;">
-                        <input type="checkbox" checked onchange="window.eventSystem.showToasts = this.checked" style="margin-right:5px;"> 显示弹幕
+                        <input type="checkbox" checked onchange="window.eventSystem.showToasts = this.checked" style="margin-right:5px;"> <span data-i18n="event.toasts">显示弹幕</span>
                     </label>
-                    <button onclick="document.getElementById('event-log').innerHTML=''" style="font-size:10px; background:#444; border:none; color:#bbb; cursor:pointer; padding:2px 6px; border-radius:4px;">清空</button>
+                    <button onclick="document.getElementById('event-log').innerHTML=''" style="font-size:10px; background:#444; border:none; color:#bbb; cursor:pointer; padding:2px 6px; border-radius:4px;" data-i18n="event.clear">清空</button>
                 </div>
                 
                 <!-- 颜色选择器 -->
                 <div style="display:flex; align-items:center; gap:5px;">
-                    <label style="font-size:11px; color:#888;">颜色:</label>
-                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffcc00')" style="background:#ffcc00; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="默认黄"></div>
-                    <div class="color-preset" onclick="window.eventSystem.setColor('#ff0055')" style="background:#ff0055; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="红"></div>
-                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ff99')" style="background:#00ff99; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="绿"></div>
-                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ccff')" style="background:#00ccff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="蓝"></div>
-                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffffff')" style="background:#ffffff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="白"></div>
+                    <label style="font-size:11px; color:#888;" data-i18n="event.color">颜色:</label>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffcc00')" style="background:#ffcc00; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="默认黄" data-i18n-title="event.yellow"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ff0055')" style="background:#ff0055; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="红" data-i18n-title="event.red"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ff99')" style="background:#00ff99; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="绿" data-i18n-title="event.green"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#00ccff')" style="background:#00ccff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="蓝" data-i18n-title="event.blue"></div>
+                    <div class="color-preset" onclick="window.eventSystem.setColor('#ffffff')" style="background:#ffffff; width:16px; height:16px; border-radius:3px; cursor:pointer; border:1px solid #666;" title="白" data-i18n-title="event.white"></div>
                     <input type="color" id="event-color-picker" value="#ffcc00" oninput="window.eventSystem.setColor(this.value)" style="width:20px; height:20px; border:none; padding:0; background:none;">
                 </div>
             </div>
             
             <!-- 日志区 -->
             <div id="event-log">
-                <div class="event-log-empty">等待事件触发...</div>
+                <div class="event-log-empty" data-i18n="event.waiting">等待事件触发...</div>
             </div>
         </div>
     </div>
@@ -332,19 +339,19 @@
     <!-- 4. 参考背景图 (默认打开) -->
     <div class="ui-group open">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">🖼️ 参考背景 (Reference)</span>
+            <span class="ui-title" data-i18n="bg.title">🖼️ 参考背景</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
             
              <!-- 背景颜色 (整合到这里) -->
              <div class="control-row" style="margin-bottom:10px; border-bottom:1px dashed #444; padding-bottom:10px;">
-                <label>背景颜色</label>
+                <label data-i18n="bg.color">背景颜色</label>
                 <div class="color-group">
                     <div class="color-preset" onclick="setBgColor('#333333')" style="background:#333333;"></div>
                     <div class="color-preset" onclick="setBgColor('#555555')" style="background:#555555;"></div>
                     <div class="color-preset" onclick="setBgColor('#2b303b')" style="background:#2b303b;"></div>
-                    <div class="color-preset" onclick="setBgCheckerboard()" title="透明/棋盘格"
+                    <div class="color-preset" onclick="setBgCheckerboard()" title="透明/棋盘格" data-i18n-title="bg.checker"
                          style="background-color:#fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;">
                     </div>
                     <input type="color" id="bg-color" value="#333333">
@@ -352,43 +359,43 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                <label style="color:#bbb; font-size:13px;">背景图片</label>
+                <label style="color:#bbb; font-size:13px;" data-i18n="bg.image">背景图片</label>
                 <label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                    <input type="checkbox" id="bg-visible" checked onchange="toggleBgVisibility(this.checked)"> 显示
+                    <input type="checkbox" id="bg-visible" checked onchange="toggleBgVisibility(this.checked)"> <span data-i18n="bg.show">显示</span>
                 </label>
             </div>
             
             <div style="display:flex; gap:5px; margin-bottom:8px;">
-                <button onclick="document.getElementById('bg-upload').click()" style="flex:1; background:#444; color:#fff; padding:4px; font-size:12px;">📂 选择</button>
+                <button onclick="document.getElementById('bg-upload').click()" style="flex:1; background:#444; color:#fff; padding:4px; font-size:12px;" data-i18n="bg.choose">📂 选择</button>
                 <input type="file" id="bg-upload" accept="image/*" style="display:none" onchange="loadBgImage(this)">
-                <button onclick="resetBgParams()" style="width:30px; background:#4466aa; color:#fff;" title="重置参数">↺</button>
-                <button onclick="clearBgImage()" style="width:30px; background:#633; color:#fff;" title="移除">×</button>
+                <button onclick="resetBgParams()" style="width:30px; background:#4466aa; color:#fff;" title="重置参数" data-i18n-title="bg.reset">↺</button>
+                <button onclick="clearBgImage()" style="width:30px; background:#633; color:#fff;" title="移除" data-i18n-title="bg.remove">×</button>
             </div>
             
             <div id="bg-controls" style="display:none; flex-direction:column; gap:5px;">
                 <div class="control-row">
-                    <label>X 位移</label>
+                    <label data-i18n="bg.x">X 位移</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="bg-x" min="-1000" max="1000" value="0" step="1" oninput="updateBgFromSlider('bg-x')" style="width:70px;">
                         <input type="number" id="val-bg-x" value="0" step="1" oninput="updateBgFromInput('bg-x')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
                     </div>
                 </div>
                 <div class="control-row">
-                    <label>Y 位移</label>
+                    <label data-i18n="bg.y">Y 位移</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="bg-y" min="-1000" max="1000" value="0" step="1" oninput="updateBgFromSlider('bg-y')" style="width:70px;">
                         <input type="number" id="val-bg-y" value="0" step="1" oninput="updateBgFromInput('bg-y')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
                     </div>
                 </div>
                 <div class="control-row">
-                    <label>大小</label>
+                    <label data-i18n="bg.size">大小</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="bg-scale" min="0.1" max="5.0" value="1.0" step="0.01" oninput="updateBgFromSlider('bg-scale')" style="width:70px;">
                         <input type="number" id="val-bg-scale" value="1.0" step="0.1" oninput="updateBgFromInput('bg-scale')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
                     </div>
                 </div>
                 <div class="control-row">
-                    <label>透明度</label>
+                    <label data-i18n="bg.opacity">透明度</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="bg-opacity" min="0.1" max="1.0" value="1.0" step="0.01" oninput="updateBgFromSlider('bg-opacity')" style="width:70px;">
                         <input type="number" id="val-bg-opacity" value="1.0" step="0.1" max="1.0" min="0" oninput="updateBgFromInput('bg-opacity')" style="width:50px; background:#222; border:1px solid #444; color:#fff; padding:2px; border-radius:4px; text-align:right;">
@@ -401,13 +408,13 @@
     <!-- 5. 角色调色板 (默认关闭) -->
     <div class="ui-group">
         <div class="ui-header" onclick="toggleGroup(this)">
-            <span class="ui-title">🎨 角色调色板 (Color)</span>
+            <span class="ui-title" data-i18n="color.title">🎨 角色调色板</span>
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
             <div id="color-filter-content" style="display:block;">
                  <div class="control-row">
-                    <label>色相 (Hue)</label>
+                    <label data-i18n="color.hue">色相</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="filter-hue" min="0" max="360" value="0" step="1" oninput="updateCharacterFilter()" style="flex:1;">
                         <span id="val-hue" style="font-size:11px; color:#aaa; width:25px; text-align:right;">0°</span>
@@ -415,7 +422,7 @@
                 </div>
                 
                 <div class="control-row">
-                    <label>饱和度 (Sat)</label>
+                    <label data-i18n="color.sat">饱和度</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="filter-sat" min="0" max="200" value="100" step="1" oninput="updateCharacterFilter()" style="flex:1;">
                         <span id="val-sat" style="font-size:11px; color:#aaa; width:25px; text-align:right;">100</span>
@@ -423,7 +430,7 @@
                 </div>
     
                 <div class="control-row">
-                    <label>亮度 (Light)</label>
+                    <label data-i18n="color.light">亮度</label>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <input type="range" id="filter-bri" min="0" max="200" value="100" step="1" oninput="updateCharacterFilter()" style="flex:1;">
                         <span id="val-bri" style="font-size:11px; color:#aaa; width:25px; text-align:right;">100</span>
@@ -431,10 +438,10 @@
                 </div>
                 
                 <div class="control-row">
-                     <label>整体染色 (Tint)</label>
+                     <label data-i18n="color.tint">整体染色</label>
                      <div style="display:flex; align-items:center; gap:5px;">
                          <input type="color" id="skeleton-tint" value="#ffffff" oninput="updateSkeletonTint(this.value)">
-                         <button onclick="resetColorFilters()" style="padding:2px 6px; font-size:10px; background:#444; color:#fff;">重置</button>
+                         <button onclick="resetColorFilters()" style="padding:2px 6px; font-size:10px; background:#444; color:#fff;" data-i18n="color.reset">重置</button>
                      </div>
                 </div>
             </div>
@@ -444,14 +451,22 @@
 </div>
 
 <div id="export-modal">
-    <h2 style="color:white;">正在导出序列帧...</h2>
+    <h2 style="color:white;" data-i18n="export.exporting">正在导出序列帧...</h2>
     <div id="export-progress-bar"><div id="export-progress-fill"></div></div>
     <p id="export-status" style="color:#aaa; margin-top:10px;">0 / 0</p>
 </div>
 
 <div id="controls" class="panel marks">
     <div class="play-row">
-        <button id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
+        <div class="transport-cluster">
+            <button type="button" id="btn-step-back" class="btn-step" onclick="animControl.step(-1)" title="逐帧后退" aria-label="逐帧后退" data-i18n-title="play.stepBack" data-i18n-aria="play.stepBack">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1 2h2v12H1z"/><path fill="currentColor" d="M14 3L5 8l9 5z"/></svg>
+            </button>
+            <button type="button" id="btn-play" onclick="animControl.togglePlay()">❚❚</button>
+            <button type="button" id="btn-step-fwd" class="btn-step" onclick="animControl.step(1)" title="逐帧前进" aria-label="逐帧前进" data-i18n-title="play.stepFwd" data-i18n-aria="play.stepFwd">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M13 2h2v12h-2z"/><path fill="currentColor" d="M2 3l9 5-9 5z"/></svg>
+            </button>
+        </div>
         <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
         <div style="display:flex; align-items:center; gap:5px; margin-left:10px;">
             <select id="time-unit-select" style="width:40px;">
@@ -464,7 +479,7 @@
 
     <div class="play-row" style="justify-content: center; gap: 20px;">
          <div class="control-group">
-            <label style="font-size:12px; color:#aaa;">倍速</label>
+            <label style="font-size:12px; color:#aaa;" data-i18n="play.speed">倍速</label>
             <select id="speed-select" style="width:60px;">
                 <option value="0.5">0.5x</option>
                 <option value="0.75">0.75x</option>
@@ -475,14 +490,14 @@
             </select>
         </div>
         <div class="control-group">
-            <label style="font-size:12px; color:#aaa;">帧率</label>
+            <label style="font-size:12px; color:#aaa;" data-i18n="play.fps">帧率</label>
             <select id="fps-select" style="width:50px;">
                 <option value="24">24</option>
                 <option value="30">30</option>
                 <option value="60" selected>60</option>
             </select>
         </div>
-        <button onclick="if(window.resetView) window.resetView()">归位</button>
+        <button onclick="if(window.resetView) window.resetView()" data-i18n="play.reset">归位</button>
     </div>
     
     <div class="play-row" style="margin-top:5px; border-top:1px solid #555; padding-top:10px; opacity:0.6;">
@@ -494,7 +509,7 @@
 <div id="version-container" style="position: fixed; bottom: 15px; right: 20px; z-index: 100; pointer-events: auto; display: flex; align-items: center; gap: 8px;">
     <div id="version-label" style="display:none">Waiting...</div>
     <select id="version-select" onchange="forceSwitchVersion(this.value)" style="background: rgba(0,0,0,0.5); border: 1px solid #666; color: #aaa; font-weight: bold; font-size: 14px; padding: 4px; border-radius: 4px; width: auto; cursor: pointer;">
-        <option value="" disabled selected>自动识别</option>
+        <option value="" disabled selected data-i18n="version.auto">自动识别</option>
         <option value="3.6">3.6</option>
         <option value="3.7">3.7</option>
         <option value="3.8">3.8</option>
@@ -507,7 +522,7 @@
     <!-- 精灵图切分配置弹窗 -->
     <div id="sheet-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
         <div class="modal-card marks" style="background-color:#f6f6f4; padding:20px; width:400px; border:1px solid #111;">
-            <h3 style="margin:0 0 15px 0; color:#fff;">📐 精灵图切分配置</h3>
+            <h3 style="margin:0 0 15px 0; color:#111;" data-i18n="sheet.title">📐 精灵图切分配置</h3>
             
             <div style="display:flex; gap:15px; margin-bottom:15px;">
                 <div style="width:120px; height:120px; background:#000; display:flex; align-items:center; justify-content:center; border:1px solid #444;">
@@ -515,25 +530,30 @@
                 </div>
                 <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
                     <div>
-                        <label style="color:#aaa; font-size:12px;">行数 (Rows):</label>
+                        <label style="color:#aaa; font-size:12px;" data-i18n="sheet.rows">行数:</label>
                         <input type="text" id="sheet-rows" value="1" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
                     </div>
                     <div>
-                        <label style="color:#aaa; font-size:12px;">列数 (Columns):</label>
+                        <label style="color:#aaa; font-size:12px;" data-i18n="sheet.cols">列数:</label>
                         <input type="text" id="sheet-cols" value="1" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
                     </div>
                     <div>
-                        <label style="color:#aaa; font-size:12px;">总帧数 (Total Frames):</label>
-                        <input type="text" id="sheet-total" value="" placeholder="默认全部" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
+                        <label style="color:#aaa; font-size:12px;" data-i18n="sheet.total">总帧数:</label>
+                        <input type="text" id="sheet-total" value="" placeholder="默认全部" data-i18n-placeholder="sheet.all" style="width:100%; background:#333; border:1px solid #555; color:#fff; padding:5px;">
                     </div>
                 </div>
             </div>
             
             <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="document.getElementById('sheet-modal').style.display='none'" style="padding:8px 15px; background:#444; color:#fff; border:none; border-radius:4px; cursor:pointer;">取消</button>
-                <button onclick="window.effectSystem.confirmSlice()" style="padding:8px 15px; background:#2a9; color:#fff; border:none; border-radius:4px; cursor:pointer;">确认导入</button>
+                <button onclick="document.getElementById('sheet-modal').style.display='none'" style="padding:8px 15px; background:#444; color:#fff; border:none; border-radius:4px; cursor:pointer;" data-i18n="sheet.cancel">取消</button>
+                <button onclick="window.effectSystem.confirmSlice()" style="padding:8px 15px; background:#2a9; color:#fff; border:none; border-radius:4px; cursor:pointer;" data-i18n="sheet.confirm">确认导入</button>
             </div>
         </div>
+    </div>
+
+    <div id="lang-switch" class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="zh" class="active">中文</button>
+        <button type="button" data-lang="en">EN</button>
     </div>
 
     <script type="module" src="/src/main.js"></script>

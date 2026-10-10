@@ -62,7 +62,7 @@ async function loadFiles36(files) {
             URL.revokeObjectURL(imgUrl);
             if(window.viewerConfig.currentLoadId !== myLoadId) return;
             if(!gl || gl.isContextLost()) {
-                if (window.log) window.log("加载失败: WebGL 上下文已丢失");
+                if (window.log) window.log(window.t("status.webglLost"), "status.webglLost");
                 return;
             }
             try {
@@ -89,13 +89,13 @@ async function loadFiles36(files) {
                         skeletonData = skeletonBinary.readSkeletonData(new Uint8Array(buffer));
                     } else {
                         // 最终确认：官方库不支持
-                        alert("❌ 加载失败：\n\nSpine 官方的 JavaScript 运行时直到 3.8 版本才加入二进制 (.skel) 支持。\n3.6 版本的官方 Web 库仅支持 JSON 格式。\n\n请使用 Spine 编辑器将动画重新导出为 JSON 格式即可解决。");
-                        if (window.log) window.log("加载失败: 3.6 不支持二进制，请改用 JSON");
+                        alert(window.t("status.bin36"));
+                        if (window.log) window.log(window.t("status.bin36log"), "status.bin36log");
                         return;
                     }
                 } catch (binError) {
-                    alert("加载 3.6 二进制异常: " + binError + "\n请使用 JSON 格式。");
-                    if (window.log) window.log("加载失败: " + binError);
+                    alert(window.t("status.bin36err", { msg: binError }));
+                    if (window.log) window.log(window.t("status.loadFail", { msg: binError }), "status.loadFail", { msg: String(binError) });
                     return;
                 }
             } else {
@@ -115,28 +115,30 @@ async function loadFiles36(files) {
             if(window.viewerConfig.animRequestId) cancelAnimationFrame(window.viewerConfig.animRequestId);
             render36();
                 const ver = skeletonData && skeletonData.version;
-                if (window.log) window.log(ver ? `版本: ${ver}` : "加载完成");
+                if (window.log) window.log(ver ? window.t("status.version", { v: ver }) : window.t("status.loaded"), ver ? "status.version" : "status.loaded", ver ? { v: ver } : undefined);
             } catch (e) {
                 console.error(e);
-                const msg = "加载失败: " + (e && e.message ? e.message : e);
-                if (window.log) window.log(msg);
+                const detail = e && e.message ? e.message : e;
+                const msg = window.t("status.loadFail", { msg: detail });
+                if (window.log) window.log(msg, "status.loadFail", { msg: String(detail) });
                 alert(msg);
             }
         };
         img.onerror = () => {
             URL.revokeObjectURL(imgUrl);
             if (window.viewerConfig.currentLoadId !== myLoadId) return;
-            const msg = "贴图解码失败";
-            if (window.log) window.log(msg);
+            const msg = window.t("status.textureFail");
+            if (window.log) window.log(msg, "status.textureFail");
             alert(msg);
         };
-        if (window.log) window.log('正在解码贴图…');
+        if (window.log) window.log(window.t("status.decoding"), "status.decoding");
         img.src = imgUrl;
 
     } catch(e) {
         console.error(e);
-        const msg = "3.6 加载错误: " + (e && e.message ? e.message : e);
-        if (window.log) window.log(msg);
+        const detail = e && e.message ? e.message : e;
+        const msg = window.t("status.err36", { msg: detail });
+        if (window.log) window.log(msg, "status.err36", { msg: String(detail) });
         alert(msg);
     }
 }

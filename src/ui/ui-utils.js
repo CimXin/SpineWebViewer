@@ -82,7 +82,7 @@ window.filterSpineFiles = function(keyword) {
     });
     
     if (keyword || window.currentFileTab === 'fav') {
-        countLabel.innerText = matchCount > 0 ? `${matchCount}个` : '无';
+        countLabel.innerText = matchCount > 0 ? window.t("file.count", { n: matchCount }) : window.t("file.none");
         countLabel.style.color = matchCount > 0 ? '#888' : '#f44';
     } else {
         countLabel.innerText = "";

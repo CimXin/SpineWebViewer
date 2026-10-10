@@ -15,7 +15,7 @@ const isNative = window.chrome && window.chrome.webview;
 if (isNative) {
     document.getElementById('web-input').style.display = 'none';
     document.getElementById('native-input').style.display = 'block';
-    log("已连接到本地引擎");
+    log(window.t("file.engine"), "file.engine");
 }
 
 window.openNativeFolder = async function() {
@@ -26,7 +26,7 @@ window.openNativeFolder = async function() {
             handleFiles(data.files);
         }
     } catch(e) {
-        alert("打开失败: " + e);
+        alert(window.t("file.openFail", { msg: e }));
     }
 };
 
@@ -47,7 +47,7 @@ document.getElementById('files-input').addEventListener('change', e => {
 
 window.forceSwitchVersion = function(ver) {
     if (!window.currentSpineFiles) return;
-    log(`手动切换至: ${ver} ...`);
+    log(window.t("file.switchVer", { v: ver }), "file.switchVer", { v: ver });
     loadSpineGroup(window.currentSpineFiles, ver);
 };
 
@@ -170,7 +170,8 @@ function renderSpineFileList(activeIndex) {
         const star = document.createElement('span');
         star.className = 'star-btn';
         star.innerHTML = '★';
-        star.title = '收藏/取消收藏';
+        star.title = window.t("file.favToggle");
+        star.setAttribute("data-i18n-title", "file.favToggle");
         const isFav = favList.includes(g.displayName);
         if (isFav) {
             star.classList.add('active');
@@ -260,7 +261,7 @@ window.clearSpineList = function() {
         drop.style.display = 'flex';
         drop.style.opacity = '1';
     }
-    log('列表已清空');
+    log(window.t("file.cleared"), "file.cleared");
 };
 
 function readAllEntries(reader) {
@@ -308,7 +309,7 @@ window.handleFiles = async function(files) {
 
     const found = groupSpineFiles(list);
     if (!found.length) {
-        alert('未找到完整的 Spine 文件。\n需要成套的 .json/.skel + .atlas + 贴图。\n添加单个时，请在同一次选择里同时选中这些文件。页面读不到没选中的同目录文件。');
+        alert(window.t("file.incomplete"));
         return;
     }
 
@@ -336,14 +337,17 @@ window.handleFiles = async function(files) {
     }
 
     if (!added.length) {
-        log(skipped ? `已在列表中，跳过 ${skipped} 个重复骨架` : '没有新的骨架');
+        log(
+            skipped ? window.t("file.dup", { n: skipped }) : window.t("file.noNew"),
+            skipped ? "file.dup" : "file.noNew",
+            skipped ? { n: skipped } : undefined
+        );
         return;
     }
 
-    const summary = skipped
-        ? `追加 ${added.length} 个，跳过 ${skipped} 个重复`
-        : `已加入 ${added.length} 个骨架`;
-    log(summary);
+    const summaryKey = skipped ? "file.addedSkip" : "file.added";
+    const summaryVars = skipped ? { a: added.length, s: skipped } : { n: added.length };
+    log(window.t(summaryKey, summaryVars), summaryKey, summaryVars);
     const activeIndex = window.spineFileGroups.length - added.length;
     loadSpineGroup(added[0].files);
     renderSpineFileList(activeIndex);

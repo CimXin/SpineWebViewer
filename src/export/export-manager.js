@@ -13,7 +13,7 @@ window.exportSequence = async function() {
     const isBatch = document.getElementById('export-batch').checked;
 
     if(!window.skeleton) {
-            alert("无法获取骨架数据");
+            alert(window.t("export.noSkel"));
             return;
     }
 
@@ -30,7 +30,7 @@ window.exportSequence = async function() {
     const modalTitle = modal.querySelector('h2');
     
     modal.style.display = 'flex';
-    modalTitle.innerText = "正在初始化...";
+    modalTitle.innerText = window.t("export.init");
 
     // Global State Backup
     const wasPlaying = window.animControl.isPlaying;
@@ -65,7 +65,7 @@ window.exportSequence = async function() {
             let currentPrefix = prefix;
 
             if (animName) {
-                status.innerText = `正在处理 (${i+1}/${animations.length}): ${animName}`;
+                status.innerText = window.t("export.progress", { i: i + 1, n: animations.length, name: animName });
                 
                 // Switch Animation
                 if (window.animationState) {
@@ -103,11 +103,11 @@ window.exportSequence = async function() {
             await runExportCore(currentDirHandle, currentPrefix);
         }
         
-        status.innerText = "全部导出完成！";
+        status.innerText = window.t("export.done");
         setTimeout(() => modal.style.display = 'none', 1000);
 
     } catch(e) {
-        alert("导出出错: " + e);
+        alert(window.t("export.fail", { msg: e }));
         console.error(e);
         modal.style.display = 'none';
     } finally {
@@ -237,7 +237,7 @@ window.exportSequence = async function() {
                 if(window.skeleton && window.spine && window.spine.Physics) window.skeleton.updateWorldTransform(window.spine.Physics.reset);
         }
 
-        modalTitle.innerText = `正在导出 ${filePrefix}...`;
+        modalTitle.innerText = window.t("export.running", { name: filePrefix });
 
         // Phase 2: Render
         if (format === 'gif') {
@@ -331,7 +331,7 @@ window.exportSequence = async function() {
             
             // 使用 WebCodecs VideoEncoder + 内嵌 WebM Muxer
             if (!('VideoEncoder' in window)) {
-                alert("当前浏览器不支持 WebCodecs API (请使用最新版 Chrome/Edge)");
+                alert(window.t("export.noWebCodecs"));
                 return;
             }
 
@@ -350,7 +350,7 @@ window.exportSequence = async function() {
                 output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
                 error: (e) => {
                     console.error(e);
-                    alert("视频编码器错误: " + e.message); // 弹出具体错误
+                    alert(window.t("export.codec", { msg: e.message }));
                 }
             });
 

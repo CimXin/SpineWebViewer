@@ -8,7 +8,45 @@ window.animControl = {
     
     togglePlay: function() {
         this.isPlaying = !this.isPlaying;
+        if (this.isPlaying) this.releaseHold();
         document.getElementById('btn-play').innerText = this.isPlaying ? "⏸" : "▶";
+    },
+
+    releaseHold: function() {
+        this.isScrubbing = false;
+        this.targetTime = -1;
+    },
+
+    pauseForStep: function() {
+        if (!this.isPlaying) return;
+        this.isPlaying = false;
+        const btn = document.getElementById('btn-play');
+        if (btn) btn.innerText = "▶";
+    },
+
+    // direction: -1 backward, +1 forward. One frame at the current 帧率 setting.
+    step: function(direction) {
+        const duration = this.duration;
+        if (!(duration > 0)) return;
+        this.pauseForStep();
+        const fps = (window.viewerConfig && window.viewerConfig.targetFps) || 60;
+        const frame = 1 / (fps > 0 ? fps : 60);
+        let time = this.currentTime;
+        if (!Number.isFinite(time)) time = 0;
+        time = ((time % duration) + duration) % duration;
+        let next = time + direction * frame;
+        next = ((next % duration) + duration) % duration;
+        this.isScrubbing = true;
+        this.targetTime = next;
+        this.currentTime = next;
+        const state = window.animationState;
+        if (state && typeof state.getCurrent === "function") {
+            const track = state.getCurrent(0);
+            if (track) track.trackTime = next;
+        }
+        this.updateUI(next, duration);
+        const el = document.getElementById('timeline');
+        if (el) el.value = String((next / duration) * 1000);
     },
 
     updateUI: function(current, total) {

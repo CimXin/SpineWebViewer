@@ -43,7 +43,7 @@ window.refreshBoneTree = function () {
     const bones = skeleton && skeleton.bones ? skeleton.bones : null;
     root.replaceChildren();
     if (!bones || !bones.length) {
-        root.textContent = "未加载骨架";
+        root.textContent = window.t ? window.t("hier.empty") : "未加载骨架";
         return;
     }
     const names = new Set();

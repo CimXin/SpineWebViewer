@@ -39,7 +39,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     if(window.debugRenderer) window.debugRenderer.drawBones(null, 0,0,1,0);
     if(window.refreshBoneTree) window.refreshBoneTree();
 
-    log('正在准备预览…');
+    log(window.t("status.prepare"), "status.prepare");
     document.getElementById('file-panel').style.display = 'flex';
     const dropZoneEarly = document.getElementById('drop-zone');
     if (dropZoneEarly && dropZoneEarly.style.display !== 'none') {
@@ -80,7 +80,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         }
     }
     
-    log(`加载 Spine ${version} …`);
+    log(window.t("status.loadingSpine", { v: version }), "status.loadingSpine", { v: version });
     
     // 更新 UI 状态
     document.getElementById('version-label').style.display = 'block';
@@ -95,9 +95,16 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
             break;
         }
     }
+    const autoOpt = vSelect.options[0];
     if(!matched) {
-        vSelect.options[0].text = `Detected: ${version}`;
-        vSelect.value = ""; 
+        autoOpt.dataset.detected = version;
+        autoOpt.removeAttribute("data-i18n");
+        autoOpt.textContent = window.t("version.detected", { v: version });
+        vSelect.value = "";
+    } else if (autoOpt.dataset.detected) {
+        delete autoOpt.dataset.detected;
+        autoOpt.setAttribute("data-i18n", "version.auto");
+        autoOpt.textContent = window.t("version.auto");
     }
     
     // 隐藏不需要的 UI
@@ -138,14 +145,14 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
         await ensureSpineRuntime(runtimeKey);
         await ensureSpineLogic(runtimeKey);
     } catch (err) {
-        alert(`无法加载脚本: ${err.message || err}`);
+        alert(window.t("status.script", { msg: err.message || err }));
         return;
     }
     if (window.viewerConfig.currentLoadId !== ts) return;
     window.spine = window.__spineRuntimes[runtimeKey];
     const start = window[entry];
     if (start) start(newCanvas, files);
-    else alert(`缺少版本适配器: ${entry}`);
+    else alert(window.t("status.missingAdapter", { entry: entry }));
 }
 
 const spineRuntimePromises = {};
@@ -205,7 +212,7 @@ function ensureSpineLogic(runtimeKey) {
 }
 
 window.loadScript = function(src, callback) {
-    loadClassicScript(src).then(callback, () => alert(`无法加载脚本: ${src}`));
+    loadClassicScript(src).then(callback, () => alert(window.t("status.script", { msg: src })));
 }
 
 window.detectJsonVersion = async function(file) {

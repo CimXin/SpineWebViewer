@@ -1,5 +1,6 @@
 import "./styles/app.css";
 
+import i18nUrl from "./i18n/i18n.js?url";
 import globalsUrl from "./state/globals.js?url";
 import uiUtilsUrl from "./ui/ui-utils.js?url";
 import debugUrl from "./viewer/debug-renderer.js?url";
@@ -24,12 +25,13 @@ function loadClassic(src) {
         el.src = src;
         el.async = false;
         el.onload = () => resolve();
-        el.onerror = () => reject(new Error(`脚本加载失败: ${src}`));
+        el.onerror = () => reject(new Error(window.t ? window.t("status.script", { msg: src }) : src));
         document.body.appendChild(el);
     });
 }
 
 const scripts = [
+    i18nUrl,
     globalsUrl,
     uiUtilsUrl,
     debugUrl,

@@ -40,7 +40,21 @@ window.setBgCheckerboard = function() {
     window.viewerConfig.bgColor = [0, 0, 0, 0]; // WebGL 全透
 }
 
-window.log = function(msg) { document.getElementById('log').innerText = msg; }
+window.log = function(msg, key, vars) {
+    const el = document.getElementById('log');
+    if (!el) return;
+    el.dataset.touched = "1";
+    el.removeAttribute("data-i18n");
+    if (typeof key === "string" && key && window.t) {
+        el.dataset.i18nKey = key;
+        el.dataset.i18nVars = vars ? JSON.stringify(vars) : "{}";
+        el.innerText = window.t(key, vars);
+    } else {
+        delete el.dataset.i18nKey;
+        delete el.dataset.i18nVars;
+        el.innerText = msg == null ? "" : String(msg);
+    }
+};
 
 // ==========================================
 // 全局配置 (指挥部)
