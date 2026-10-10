@@ -7,6 +7,7 @@ import debugUrl from "./viewer/debug-renderer.js?url";
 import debugToolsUrl from "./viewer/debug-tools.js?url";
 import boneTreeUrl from "./viewer/bone-tree.js?url";
 import animControlUrl from "./viewer/anim-control.js?url";
+import animDirectorUrl from "./viewer/anim-director.js?url";
 import viewUrl from "./viewer/view-manager.js?url";
 import configUrl from "./config/config-manager.js?url";
 import filesUrl from "./files/file-handler.js?url";
@@ -39,6 +40,7 @@ const scripts = [
     debugToolsUrl,
     boneTreeUrl,
     animControlUrl,
+    animDirectorUrl,
     viewUrl,
     configUrl,
     filesUrl,

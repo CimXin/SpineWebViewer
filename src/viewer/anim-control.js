@@ -55,6 +55,14 @@ window.animControl = {
         
         const el = document.getElementById('timeline');
         const txt = document.getElementById('time-text');
+        if (window.animDirector && window.animDirector.tick) window.animDirector.tick();
+
+        if (!(total > 0)) {
+            if (txt) txt.innerText = window.viewerConfig.timeMode === 'frames' ? '0 / 0' : '0.00 / 0.00';
+            if (txt) txt.style.color = '#111111';
+            if (el && !this.isScrubbing) el.value = 0;
+            return;
+        }
         
         if (!this.isScrubbing && total > 0) {
             const progress = (current % total) / total;

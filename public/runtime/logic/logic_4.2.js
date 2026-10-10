@@ -354,7 +354,11 @@ window.startSpine42 = async function(canvas, files) {
         // 初始应用
         if(window.updateMixSkin) window.updateMixSkin([defaultSkin]);
 
-        animSelect.onchange = () => state.setAnimation(0, animSelect.value, true);
+        animSelect.onchange = () => {
+            if (window.animDirector) window.animDirector.playPrimary(animSelect.value);
+            else state.setAnimation(0, animSelect.value, true);
+        };
+        if (window.animDirector) window.animDirector.attach();
     }
 
     function readFile(f, type) {
@@ -442,6 +446,16 @@ window.startSpine42 = async function(canvas, files) {
 
             if(!Number.isFinite(cam.zoom)) cam.zoom=0.1;
             const w = canvas.width, h = canvas.height;
+            if (window.stageCompare && window.stageCompare.beforeDraw) {
+                window.stageCompare.beforeDraw({
+                    get x() { return cam.x; },
+                    set x(v) { cam.x = v; },
+                    get zoom() { return cam.zoom; },
+                    set zoom(v) { cam.zoom = v; },
+                    canvasW: w,
+                    canvasH: h
+                });
+            }
             Mat4.ortho(mvp, cam.x - w/cam.zoom/2, cam.x + w/cam.zoom/2, cam.y - h/cam.zoom/2, cam.y + h/cam.zoom/2, -2000, 2000);
             
             shader.bind();
@@ -457,6 +471,7 @@ window.startSpine42 = async function(canvas, files) {
 
             batcher.begin(shader);
             renderer.draw(batcher, skeleton);
+            if (window.stageCompare) window.stageCompare.draw(function (sk) { renderer.draw(batcher, sk); }, dt);
             batcher.end();
             shader.unbind();
 
@@ -466,5 +481,6 @@ window.startSpine42 = async function(canvas, files) {
             }
 
         } catch(e) { }
+        if (window.stageCompare && window.stageCompare.afterDraw) window.stageCompare.afterDraw();
     }
 };

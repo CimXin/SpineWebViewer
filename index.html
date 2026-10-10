@@ -234,6 +234,28 @@
                     <span data-i18n="anim.addTrack">➕ 添加叠加轨道</span>
                 </button>
             </div>
+
+            <div class="control-row">
+                <label data-i18n="anim.mix" title="切换或排队时，从上一段混到下一段的秒数。0 表示立刻切换。" data-i18n-title="anim.mixTip">交叉淡化</label>
+                <input type="number" id="mix-duration" min="0" max="5" step="0.05" value="0">
+            </div>
+            <div class="control-row">
+                <label data-i18n="anim.mode">播放方式</label>
+                <select id="play-mode">
+                    <option value="loop" data-i18n="anim.loop">循环</option>
+                    <option value="once" data-i18n="anim.once">一次</option>
+                    <option value="pingpong" data-i18n="anim.pingpong">往返</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <label data-i18n="anim.queue">下一段</label>
+                <select id="queue-anim"></select>
+            </div>
+            <button type="button" class="debug-reset" id="btn-queue" data-i18n="anim.enqueue">加入队列</button>
+            <div id="queue-list" class="debug-list"></div>
+            <button type="button" class="debug-reset" id="btn-queue-clear" data-i18n="anim.clearQueue">清空队列</button>
+            <button type="button" class="debug-reset" id="btn-setup-pose" data-i18n="anim.setup" data-i18n-title="anim.setupTip" title="清空轨道并回到 Setup Pose。">初始姿势</button>
+            <p class="debug-hint" data-i18n="anim.marksHint">时间轴上的短线是关键帧，青色是事件。</p>
             
             <div style="margin-bottom:15px;">
                 <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;" data-i18n="anim.skin">选择皮肤</label>
@@ -256,6 +278,18 @@
                     </label>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="stage.title">同台对比</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="stage.hint">副本排在主体旁边，画面会自动取景。可以各自选动画。列表里的其他骨架也可以并排（需要当前这套运行时能解析）。</p>
+            <button type="button" class="debug-reset" onclick="window.stageCompare && window.stageCompare.addClone()" data-i18n="stage.add">添加副本</button>
+            <div id="stage-list" class="debug-list"></div>
         </div>
     </div>
 
@@ -556,7 +590,10 @@
                 <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M13 2h2v12h-2z"/><path fill="currentColor" d="M2 3l9 5-9 5z"/></svg>
             </button>
         </div>
-        <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
+        <div class="timeline-wrap">
+            <div id="timeline-marks" class="timeline-marks"></div>
+            <input type="range" id="timeline" min="0" max="1000" value="0" step="1">
+        </div>
         <div style="display:flex; align-items:center; gap:5px; margin-left:10px;">
             <select id="time-unit-select" style="width:40px;">
                 <option value="seconds">s</option>
