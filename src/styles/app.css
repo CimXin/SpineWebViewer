@@ -1122,11 +1122,37 @@ h1, .splash-title {
 
 #search-count { color: var(--muted) !important; font-family: var(--font-mono); }
 
-.lang-switch {
+.corner-dock {
     position: fixed;
     left: 16px;
     bottom: 16px;
     z-index: 110;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    pointer-events: auto;
+}
+.github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    box-sizing: border-box;
+    background: #111;
+    color: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.72);
+    text-decoration: none;
+}
+.github-link svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+.github-link:hover {
+    background: var(--field);
+    color: #111;
+}
+.lang-switch {
     display: flex;
     background: #111;
     border: 1px solid rgba(255,255,255,0.72);
@@ -1136,8 +1162,8 @@ h1, .splash-title {
     pointer-events: auto;
 }
 .lang-switch button {
-    background: transparent;
-    color: rgba(255,255,255,0.55);
+    background: var(--field);
+    color: #111;
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -1153,12 +1179,12 @@ h1, .splash-title {
     border-left: 1px solid rgba(255,255,255,0.28);
 }
 .lang-switch button.active {
-    background: var(--field);
-    color: #111;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
 }
 .lang-switch button:hover {
-    color: #fff;
+    color: #111;
 }
 .lang-switch button.active:hover {
-    color: #111;
+    color: #fff;
 }
