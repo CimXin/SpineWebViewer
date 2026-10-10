@@ -414,6 +414,20 @@
         el.appendChild(p);
     }
 
+    function restoreSlot(slot) {
+        if (!slot) return;
+        if (typeof slot.setToSetupPose === "function") {
+            try { slot.setToSetupPose(); return; } catch (e) {}
+        }
+        var color = slot.data && slot.data.color;
+        if (slot.color && color) {
+            slot.color.r = color.r;
+            slot.color.g = color.g;
+            slot.color.b = color.b;
+            slot.color.a = color.a;
+        }
+    }
+
     function buildSlots() {
         var el = document.getElementById("debug-slot-list");
         if (!el) return;
@@ -596,8 +610,8 @@
         });
         if (typeof skeleton.getBounds !== "function") return;
         try {
-            var offset = { x: 0, y: 0 };
-            var size = { x: 0, y: 0 };
+            var offset = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
+            var size = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
             skeleton.getBounds(offset, size, []);
             if (!(size.x > 0) || !(size.y > 0)) return;
             ctx.save();
@@ -723,6 +737,8 @@
             return !!(c && (c.debugMesh || c.debugTris || c.debugHull || c.debugBounds || c.debugPaths || c.debugClip || c.debugConstraints || c.debugPhysics || c.debugPoints));
         },
         tick: function (skeleton) {
+            var next = skeleton || null;
+            if (next !== bound) api.refresh();
             var now = (window.performance && performance.now) ? performance.now() : Date.now();
             if (lastTick) {
                 var dt = now - lastTick;
@@ -817,11 +833,24 @@
             paintStats();
         },
         resetSlots: function () {
+            var skeleton = window.skeleton;
+            if (skeleton && skeleton.slots) {
+                for (var i = 0; i < skeleton.slots.length; i++) {
+                    if (overrides[slotName(skeleton.slots[i])]) restoreSlot(skeleton.slots[i]);
+                }
+            }
             overrides = {};
             buildSlots();
         },
         resetOrder: function () {
             pinned = null;
+            var skeleton = window.skeleton;
+            if (skeleton && skeleton.slots && skeleton.drawOrder) {
+                var slots = skeleton.slots;
+                var draw = skeleton.drawOrder;
+                for (var i = 0; i < slots.length; i++) draw[i] = slots[i];
+                draw.length = slots.length;
+            }
             buildOrder();
         },
         paintStats: paintStats
@@ -838,8 +867,12 @@
                 if (!row) return;
                 var name = row.getAttribute("data-slot");
                 var o = overrides[name] || {};
-                if (e.target.classList.contains("debug-vis")) o.hidden = !e.target.checked;
-                else if (e.target.classList.contains("debug-tint")) o.tint = e.target.value;
+                if (e.target.classList.contains("debug-vis")) {
+                    o.hidden = !e.target.checked;
+                    if (!o.hidden && window.skeleton && window.skeleton.slots) {
+                        restoreSlot(window.skeleton.slots[parseInt(row.getAttribute("data-index"), 10)]);
+                    }
+                } else if (e.target.classList.contains("debug-tint")) o.tint = e.target.value;
                 else if (e.target.classList.contains("debug-att")) o.attachment = e.target.value || null;
                 if (!o.hidden && !o.tint && !o.attachment) delete overrides[name];
                 else overrides[name] = o;
