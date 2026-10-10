@@ -205,6 +205,7 @@ function setupSkeleton38(skeletonData) {
         
         // 关键：重新应用动画，防止重置后角色不动
         if(animationState) animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
     };
 
@@ -292,6 +293,7 @@ function render38() {
         }
 
         animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
         
         shader.bind();

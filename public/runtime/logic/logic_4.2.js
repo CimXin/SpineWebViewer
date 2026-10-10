@@ -273,8 +273,8 @@ window.startSpine42 = async function(canvas, files) {
             setupUI(skelData); 
             
             // 预热两帧
-            state.update(0); state.apply(skeleton); skeleton.updateWorldTransform(spine.Physics.update);
-            state.update(0); state.apply(skeleton); skeleton.updateWorldTransform(spine.Physics.update);
+            state.update(0); state.apply(skeleton); if (window.debugTools) window.debugTools.afterApply(skeleton); skeleton.updateWorldTransform(spine.Physics.update);
+            state.update(0); state.apply(skeleton); if (window.debugTools) window.debugTools.afterApply(skeleton); skeleton.updateWorldTransform(spine.Physics.update);
             
             // 自动对焦
             const offset = new spine.Vector2(), size = new spine.Vector2();
@@ -431,7 +431,7 @@ window.startSpine42 = async function(canvas, files) {
                 state.update(dt);
             }
 
-            state.apply(skeleton);
+            state.apply(skeleton); if (window.debugTools) window.debugTools.afterApply(skeleton);
             
             // 物理更新逻辑
             if(skeleton.update && (!ctrl || (ctrl.isPlaying && !ctrl.isScrubbing))) {

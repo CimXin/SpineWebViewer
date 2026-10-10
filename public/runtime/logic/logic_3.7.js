@@ -198,6 +198,7 @@ function setupSkeleton37(skeletonData) {
         skeleton.setToSetupPose();
         
         if(animationState) animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
     };
 
@@ -277,6 +278,7 @@ function render37() {
         }
 
         animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
         
         shader.bind();

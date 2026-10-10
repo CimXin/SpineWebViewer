@@ -300,6 +300,7 @@ function render41() {
         }
 
         animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
         renderer.begin();
         renderer.drawSkeleton(skeleton, true);

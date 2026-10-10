@@ -71,6 +71,16 @@ window.viewerConfig = {
     timeMode: 'seconds',
     pmaEnabled: false, // 运行时混合开关，默认关闭
     unpackEnabled: false, // 加载时解包开关
+    debugMesh: false,
+    debugTris: false,
+    debugHull: false,
+    debugBounds: false,
+    debugPaths: false,
+    debugClip: false,
+    debugConstraints: false,
+    debugPhysics: false,
+    debugPoints: false,
+    showStats: false,
     debugCtx: null,
     debugCanvas: null
 };

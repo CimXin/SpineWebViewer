@@ -73,6 +73,8 @@
     <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 </div>
 
+<div id="stats-hud" class="stats-hud"></div>
+
 <label id="origin-overlay" class="origin-overlay" title="原点坐标轴" data-i18n-title="origin.title">
     <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴" data-i18n-aria="origin.title">
     <svg class="origin-icon" viewBox="0 0 20 20" aria-hidden="true">
@@ -295,6 +297,93 @@
         <div class="ui-content">
             <p class="bone-tree-hint" data-i18n="hier.hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
             <div id="bone-tree" class="bone-tree" data-i18n="hier.empty">未加载骨架</div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.visTitle">◇ 调试与可视化</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.visHint">叠加层画在骨骼层上。当前版本没有的数据会自动跳过。</p>
+            <div class="control-row">
+                <label data-i18n="debug.mesh">网格线框</label>
+                <input type="checkbox" id="chk-debug-mesh" onchange="window.viewerConfig.debugMesh = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.tris">三角面</label>
+                <input type="checkbox" id="chk-debug-tris" onchange="window.viewerConfig.debugTris = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.hull">凸包轮廓</label>
+                <input type="checkbox" id="chk-debug-hull" onchange="window.viewerConfig.debugHull = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.bounds">包围盒</label>
+                <input type="checkbox" id="chk-debug-bounds" onchange="window.viewerConfig.debugBounds = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.paths">路径</label>
+                <input type="checkbox" id="chk-debug-paths" onchange="window.viewerConfig.debugPaths = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.clip">裁剪区域</label>
+                <input type="checkbox" id="chk-debug-clip" onchange="window.viewerConfig.debugClip = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.constraints">约束</label>
+                <input type="checkbox" id="chk-debug-constraints" onchange="window.viewerConfig.debugConstraints = this.checked">
+            </div>
+            <div class="control-row" id="debug-physics-row" hidden>
+                <label data-i18n="debug.physics">物理约束</label>
+                <input type="checkbox" id="chk-debug-physics" onchange="window.viewerConfig.debugPhysics = this.checked">
+            </div>
+            <p class="debug-hint" id="debug-physics-note" hidden data-i18n="debug.physicsNA">当前运行时不支持物理约束（需要 4.2）。</p>
+            <div class="control-row">
+                <label data-i18n="debug.points">点附件</label>
+                <input type="checkbox" id="chk-debug-points" onchange="window.viewerConfig.debugPoints = this.checked; if (window.debugTools) window.debugTools.paintStats();">
+            </div>
+            <div id="debug-point-readout" class="debug-points"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.slotTitle">插槽</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.slotHint">隐藏、染色和换附件会盖住当前动画，直到重置。</p>
+            <button type="button" class="debug-reset" onclick="window.debugTools && window.debugTools.resetSlots()" data-i18n="debug.resetSlots">重置插槽</button>
+            <div id="debug-slot-list" class="debug-list"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.orderTitle">绘制顺序</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.drawHint">列表自上而下是从前景到背景。调整会盖住动画里的绘制顺序，直到重置。</p>
+            <button type="button" class="debug-reset" onclick="window.debugTools && window.debugTools.resetOrder()" data-i18n="debug.resetOrder">重置顺序</button>
+            <div id="debug-order-list" class="debug-list"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.statsTitle">性能</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <div class="control-row">
+                <label data-i18n="debug.showHud">显示性能浮层</label>
+                <input type="checkbox" id="chk-debug-stats" onchange="window.viewerConfig.showStats = this.checked; if (window.debugTools) window.debugTools.paintStats();">
+            </div>
+            <div id="debug-stats-readout" class="debug-stats"></div>
+            <p class="debug-hint" data-i18n="debug.statsHint">三角面和顶点按可见的区域附件与网格估算。可绘制附件不是精确的 WebGL 绘制次数。</p>
         </div>
     </div>
 
