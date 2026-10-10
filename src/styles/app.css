@@ -1188,3 +1188,185 @@ h1, .splash-title {
 .lang-switch button.active:hover {
     color: #fff;
 }
+
+.stats-hud {
+    display: none;
+    position: fixed;
+    top: 16px;
+    right: 332px;
+    z-index: 40;
+    min-width: 168px;
+    padding: 8px 10px;
+    background-color: rgba(17, 17, 17, 0.92);
+    color: #f4f4f2;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.45;
+    pointer-events: none;
+}
+body:has(#ui[style*="display: block"]) .stats-hud.on,
+body:has(#ui[style*="display:block"]) .stats-hud.on {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1px 14px;
+}
+.stats-hud b {
+    color: var(--field);
+    font-weight: 600;
+    text-align: right;
+}
+#ui .debug-hint {
+    margin: 0 0 8px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #c8c8c6;
+}
+#ui .debug-list {
+    max-height: 220px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+#ui .debug-slot {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr) 28px;
+    gap: 4px 6px;
+    align-items: center;
+}
+#ui .debug-slot select {
+    grid-column: 1 / -1;
+    width: 100%;
+    font-size: 11px;
+}
+#ui .debug-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+#ui .debug-tint {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+#ui .debug-order {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+#ui .debug-order span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+#ui .debug-order button {
+    width: auto;
+    min-width: 44px;
+    height: 22px;
+    padding: 0 4px;
+    font-size: 11px;
+    line-height: 20px;
+}
+#ui .debug-stats {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    margin: 4px 0 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #e6e6e4;
+}
+#ui .debug-stats b {
+    color: var(--field);
+    font-weight: 600;
+    text-align: right;
+}
+#ui .debug-points {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #e6e6e4;
+    max-height: 88px;
+    overflow: auto;
+    margin-top: 4px;
+}
+#ui button.debug-reset {
+    width: 100%;
+    margin: 0 0 4px;
+}
+#ui #mix-duration {
+    width: 72px;
+}
+#ui .queue-name {
+    font-size: 12px;
+    color: #e6e6e4;
+    padding: 2px 0;
+}
+#ui .stage-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+    gap: 4px;
+    align-items: center;
+}
+#ui .stage-row button {
+    width: auto;
+    min-width: 44px;
+    height: 22px;
+    padding: 0 6px;
+    font-size: 11px;
+}
+.timeline-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 18px;
+    display: flex;
+    align-items: center;
+}
+.timeline-wrap #timeline {
+    width: 100%;
+}
+.timeline-marks {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 0;
+    height: 8px;
+    pointer-events: none;
+}
+.tl-mark {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 7px;
+    margin-left: -1px;
+    background: var(--ink);
+}
+.tl-mark.event {
+    background: var(--teal);
+    height: 11px;
+    pointer-events: auto;
+}
+.file-compare {
+    margin-left: auto;
+    flex: 0 0 auto;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+.file-item.active .file-compare {
+    color: var(--paper);
+    border-color: var(--paper);
+    background: transparent;
+}

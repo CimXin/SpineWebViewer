@@ -161,7 +161,7 @@ function renderSpineFileList(activeIndex) {
         item.dataset.index = index;
         item.dataset.searchKey = g.displayName.toLowerCase();
         item.onclick = (e) => {
-            if (e.target.classList.contains('star-btn')) return;
+            if (e.target.closest && e.target.closest('.star-btn, .file-compare')) return;
             document.querySelectorAll('.file-item').forEach(d => d.classList.remove('active'));
             item.classList.add('active');
             switchSpineFile(index);
@@ -207,12 +207,24 @@ function renderSpineFileList(activeIndex) {
         info.appendChild(name);
         info.appendChild(path);
 
+        const compare = document.createElement('button');
+        compare.type = 'button';
+        compare.className = 'file-compare';
+        compare.setAttribute('data-i18n', 'stage.compare');
+        compare.textContent = window.t ? window.t('stage.compare') : '并排';
+        compare.onclick = (e) => {
+            e.stopPropagation();
+            if (window.stageCompare) window.stageCompare.addFromList(index);
+        };
+
         item.appendChild(star);
         item.appendChild(img);
         item.appendChild(info);
+        item.appendChild(compare);
         listContainer.appendChild(item);
     });
 
+    window.spineActiveIndex = activeIndex;
     document.getElementById('file-list-container').style.display = groups.length ? 'block' : 'none';
     const search = document.getElementById('spine-file-search');
     if (search && window.filterSpineFiles) filterSpineFiles(search.value);

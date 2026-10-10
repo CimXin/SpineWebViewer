@@ -40,11 +40,13 @@ window.debugRenderer = {
     drawBones: function(skeleton, camX, camY, zoom, canvasHeight) {
         const ctx = window.viewerConfig.debugCtx;
         const c = window.viewerConfig.debugCanvas;
+        if (window.debugTools) window.debugTools.tick(skeleton);
         const showBones = !!(window.viewerConfig.showBones && skeleton);
         const showOrigin = window.viewerConfig.showOrigin !== false && !!skeleton;
         const highlightName = skeleton && window.viewerConfig.highlightBone;
         const showHighlight = !!highlightName;
-        if(!ctx || !c || (!showBones && !showOrigin && !showHighlight)) {
+        const showOverlay = !!(skeleton && window.debugTools && window.debugTools.wantsOverlay());
+        if(!ctx || !c || (!showBones && !showOrigin && !showHighlight && !showOverlay)) {
             if(ctx && c) ctx.clearRect(0, 0, c.width, c.height);
             return;
         }
@@ -61,11 +63,17 @@ window.debugRenderer = {
 
         if (showOrigin) this.drawOriginAxes(ctx, skeleton, zoom);
 
-        if (!showBones) {
-            if (showHighlight) this.drawBoneHighlight(ctx, skeleton, highlightName, zoom);
+        const finishOverlay = () => {
+            if (showOverlay) window.debugTools.drawWorld(ctx, skeleton, zoom);
             ctx.restore();
             if (showOrigin) this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
             if (showHighlight) this.drawBoneHighlightLabel(ctx, c, skeleton, highlightName, camX, camY, zoom);
+            if (showOverlay) window.debugTools.drawLabels(ctx, c, skeleton, camX, camY, zoom);
+        };
+
+        if (!showBones) {
+            if (showHighlight) this.drawBoneHighlight(ctx, skeleton, highlightName, zoom);
+            finishOverlay();
             return;
         }
 
@@ -172,9 +180,7 @@ window.debugRenderer = {
             }
         }
         if (showHighlight) this.drawBoneHighlight(ctx, skeleton, highlightName, zoom);
-        ctx.restore();
-        if (showOrigin) this.drawOriginLabels(ctx, c, skeleton, camX, camY, zoom);
-        if (showHighlight) this.drawBoneHighlightLabel(ctx, c, skeleton, highlightName, camX, camY, zoom);
+        finishOverlay();
     },
     findBone: function(skeleton, name) {
         if (!skeleton || !skeleton.bones || !name) return null;

@@ -212,7 +212,11 @@ function setupSkeleton40(skeletonData) {
     // 初始调用一次，应用默认皮肤
     if(window.updateMixSkin) window.updateMixSkin([defaultSkin]);
 
-    animSelect.onchange = () => animationState.setAnimation(0, animSelect.value, true);
+    animSelect.onchange = () => {
+        if (window.animDirector) window.animDirector.playPrimary(animSelect.value);
+        else animationState.setAnimation(0, animSelect.value, true);
+    };
+    if (window.animDirector) window.animDirector.attach();
     
     bindControls40();
     updateControls40();
@@ -300,9 +304,22 @@ function render40() {
         }
 
         animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
+        if (window.stageCompare && window.stageCompare.beforeDraw) {
+            const cam = renderer.camera;
+            window.stageCompare.beforeDraw({
+                get x() { return cam.position.x; },
+                set x(v) { cam.position.x = v; },
+                get zoom() { return 1 / cam.zoom; },
+                set zoom(v) { cam.zoom = 1 / v; },
+                canvasW: w,
+                canvasH: h
+            });
+        }
         renderer.begin();
         renderer.drawSkeleton(skeleton, true);
+        if (window.stageCompare) window.stageCompare.draw(function (sk) { renderer.drawSkeleton(sk, true); }, delta);
         renderer.end();
 
         // === 绘制骨骼调试线 (导出时不绘制) ===
@@ -315,6 +332,7 @@ function render40() {
                 h
             );
         }
+        if (window.stageCompare && window.stageCompare.afterDraw) window.stageCompare.afterDraw();
     }
 }
 

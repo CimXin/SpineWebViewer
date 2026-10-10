@@ -205,6 +205,7 @@ function setupSkeleton38(skeletonData) {
         
         // 关键：重新应用动画，防止重置后角色不动
         if(animationState) animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
     };
 
@@ -213,7 +214,11 @@ function setupSkeleton38(skeletonData) {
         window.updateMixSkin([defaultSkinName]);
     }
 
-    animSelect.onchange = () => animationState.setAnimation(0, animSelect.value, true);
+    animSelect.onchange = () => {
+        if (window.animDirector) window.animDirector.playPrimary(animSelect.value);
+        else animationState.setAnimation(0, animSelect.value, true);
+    };
+    if (window.animDirector) window.animDirector.attach();
     // skinSelect.onchange 已废弃，由 updateMixSkin 接管
     
     bindControls38();
@@ -292,9 +297,20 @@ function render38() {
         }
 
         animationState.apply(skeleton);
+        if (window.debugTools) window.debugTools.afterApply(skeleton);
         skeleton.updateWorldTransform();
         
         shader.bind();
+        if (window.stageCompare && window.stageCompare.beforeDraw) {
+            window.stageCompare.beforeDraw({
+                get x() { return camX; },
+                set x(v) { camX = v; },
+                get zoom() { return camZoom; },
+                set zoom(v) { camZoom = v; },
+                canvasW: w,
+                canvasH: h
+            });
+        }
         mvp.ortho2d(camX - w/2/camZoom, camY - h/2/camZoom, w/camZoom, h/camZoom);
         shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, mvp.values);
         shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
@@ -307,6 +323,7 @@ function render38() {
 
         batcher.begin(shader);
         skeletonRenderer.draw(batcher, skeleton);
+        if (window.stageCompare) window.stageCompare.draw(function (sk) { skeletonRenderer.draw(batcher, sk); }, delta);
         batcher.end();
         shader.unbind();
 
@@ -314,6 +331,7 @@ function render38() {
         if(!isExporting && window.debugRenderer) {
             window.debugRenderer.drawBones(skeleton, camX, camY, camZoom, h);
         }
+        if (window.stageCompare && window.stageCompare.afterDraw) window.stageCompare.afterDraw();
     }
 }
 
