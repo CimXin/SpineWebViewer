@@ -4,8 +4,10 @@ import i18nUrl from "./i18n/i18n.js?url";
 import globalsUrl from "./state/globals.js?url";
 import uiUtilsUrl from "./ui/ui-utils.js?url";
 import debugUrl from "./viewer/debug-renderer.js?url";
+import debugToolsUrl from "./viewer/debug-tools.js?url";
 import boneTreeUrl from "./viewer/bone-tree.js?url";
 import animControlUrl from "./viewer/anim-control.js?url";
+import animDirectorUrl from "./viewer/anim-director.js?url";
 import viewUrl from "./viewer/view-manager.js?url";
 import configUrl from "./config/config-manager.js?url";
 import filesUrl from "./files/file-handler.js?url";
@@ -35,8 +37,10 @@ const scripts = [
     globalsUrl,
     uiUtilsUrl,
     debugUrl,
+    debugToolsUrl,
     boneTreeUrl,
     animControlUrl,
+    animDirectorUrl,
     viewUrl,
     configUrl,
     filesUrl,

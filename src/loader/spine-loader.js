@@ -38,6 +38,8 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     window.animationState = null;
     if(window.debugRenderer) window.debugRenderer.drawBones(null, 0,0,1,0);
     if(window.refreshBoneTree) window.refreshBoneTree();
+    if(window.debugTools) window.debugTools.refresh();
+    if(window.stageCompare) window.stageCompare.clear();
 
     log(window.t("status.prepare"), "status.prepare");
     document.getElementById('file-panel').style.display = 'flex';
@@ -123,6 +125,7 @@ window.loadSpineGroup = async function(files, forceVersion = null) {
     window.onSpineLoaded = function() {
         if(window.effectSystem) window.effectSystem.scanEvents();
         if(window.refreshBoneTree) window.refreshBoneTree();
+        if(window.debugTools) window.debugTools.refresh();
     };
 
     // Official runtime + version adapter. See public/vendor/spine/versions.json.

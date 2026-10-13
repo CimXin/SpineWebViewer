@@ -73,6 +73,8 @@
     <canvas id="debug-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10;"></canvas>
 </div>
 
+<div id="stats-hud" class="stats-hud"></div>
+
 <label id="origin-overlay" class="origin-overlay" title="原点坐标轴" data-i18n-title="origin.title">
     <input type="checkbox" id="chk-origin" checked onchange="window.viewerConfig.showOrigin = this.checked" aria-label="原点坐标轴" data-i18n-aria="origin.title">
     <svg class="origin-icon" viewBox="0 0 20 20" aria-hidden="true">
@@ -232,6 +234,28 @@
                     <span data-i18n="anim.addTrack">➕ 添加叠加轨道</span>
                 </button>
             </div>
+
+            <div class="control-row">
+                <label data-i18n="anim.mix" title="切换或排队时，从上一段混到下一段的秒数。0 表示立刻切换。" data-i18n-title="anim.mixTip">交叉淡化</label>
+                <input type="number" id="mix-duration" min="0" max="5" step="0.05" value="0">
+            </div>
+            <div class="control-row">
+                <label data-i18n="anim.mode">播放方式</label>
+                <select id="play-mode">
+                    <option value="loop" data-i18n="anim.loop">循环</option>
+                    <option value="once" data-i18n="anim.once">一次</option>
+                    <option value="pingpong" data-i18n="anim.pingpong">往返</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <label data-i18n="anim.queue">下一段</label>
+                <select id="queue-anim"></select>
+            </div>
+            <button type="button" class="debug-reset" id="btn-queue" data-i18n="anim.enqueue">加入队列</button>
+            <div id="queue-list" class="debug-list"></div>
+            <button type="button" class="debug-reset" id="btn-queue-clear" data-i18n="anim.clearQueue">清空队列</button>
+            <button type="button" class="debug-reset" id="btn-setup-pose" data-i18n="anim.setup" data-i18n-title="anim.setupTip" title="清空轨道并回到 Setup Pose。">初始姿势</button>
+            <p class="debug-hint" data-i18n="anim.marksHint">时间轴上的短线是关键帧，青色是事件。</p>
             
             <div style="margin-bottom:15px;">
                 <label style="display:block; margin-bottom:5px; color:#bbb; font-size:13px;" data-i18n="anim.skin">选择皮肤</label>
@@ -254,6 +278,18 @@
                     </label>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="stage.title">同台对比</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="stage.hint">副本排在主体旁边，画面会自动取景。可以各自选动画。列表里的其他骨架也可以并排（需要当前这套运行时能解析）。</p>
+            <button type="button" class="debug-reset" onclick="window.stageCompare && window.stageCompare.addClone()" data-i18n="stage.add">添加副本</button>
+            <div id="stage-list" class="debug-list"></div>
         </div>
     </div>
 
@@ -295,6 +331,93 @@
         <div class="ui-content">
             <p class="bone-tree-hint" data-i18n="hier.hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
             <div id="bone-tree" class="bone-tree" data-i18n="hier.empty">未加载骨架</div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.visTitle">◇ 调试与可视化</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.visHint">叠加层画在骨骼层上。当前版本没有的数据会自动跳过。</p>
+            <div class="control-row">
+                <label data-i18n="debug.mesh">网格线框</label>
+                <input type="checkbox" id="chk-debug-mesh" onchange="window.viewerConfig.debugMesh = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.tris">三角面</label>
+                <input type="checkbox" id="chk-debug-tris" onchange="window.viewerConfig.debugTris = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.hull">凸包轮廓</label>
+                <input type="checkbox" id="chk-debug-hull" onchange="window.viewerConfig.debugHull = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.bounds">包围盒</label>
+                <input type="checkbox" id="chk-debug-bounds" onchange="window.viewerConfig.debugBounds = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.paths">路径</label>
+                <input type="checkbox" id="chk-debug-paths" onchange="window.viewerConfig.debugPaths = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.clip">裁剪区域</label>
+                <input type="checkbox" id="chk-debug-clip" onchange="window.viewerConfig.debugClip = this.checked">
+            </div>
+            <div class="control-row">
+                <label data-i18n="debug.constraints">约束</label>
+                <input type="checkbox" id="chk-debug-constraints" onchange="window.viewerConfig.debugConstraints = this.checked">
+            </div>
+            <div class="control-row" id="debug-physics-row" hidden>
+                <label data-i18n="debug.physics">物理约束</label>
+                <input type="checkbox" id="chk-debug-physics" onchange="window.viewerConfig.debugPhysics = this.checked">
+            </div>
+            <p class="debug-hint" id="debug-physics-note" hidden data-i18n="debug.physicsNA">当前运行时不支持物理约束（需要 4.2）。</p>
+            <div class="control-row">
+                <label data-i18n="debug.points">点附件</label>
+                <input type="checkbox" id="chk-debug-points" onchange="window.viewerConfig.debugPoints = this.checked; if (window.debugTools) window.debugTools.paintStats();">
+            </div>
+            <div id="debug-point-readout" class="debug-points"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.slotTitle">插槽</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.slotHint">隐藏、染色和换附件会盖住当前动画，直到重置。</p>
+            <button type="button" class="debug-reset" onclick="window.debugTools && window.debugTools.resetSlots()" data-i18n="debug.resetSlots">重置插槽</button>
+            <div id="debug-slot-list" class="debug-list"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.orderTitle">绘制顺序</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <p class="debug-hint" data-i18n="debug.drawHint">列表自上而下是从前景到背景。调整会盖住动画里的绘制顺序，直到重置。</p>
+            <button type="button" class="debug-reset" onclick="window.debugTools && window.debugTools.resetOrder()" data-i18n="debug.resetOrder">重置顺序</button>
+            <div id="debug-order-list" class="debug-list"></div>
+        </div>
+    </div>
+
+    <div class="ui-group">
+        <div class="ui-header" onclick="toggleGroup(this)">
+            <span class="ui-title" data-i18n="debug.statsTitle">性能</span>
+            <span class="ui-arrow">▶</span>
+        </div>
+        <div class="ui-content">
+            <div class="control-row">
+                <label data-i18n="debug.showHud">显示性能浮层</label>
+                <input type="checkbox" id="chk-debug-stats" onchange="window.viewerConfig.showStats = this.checked; if (window.debugTools) window.debugTools.paintStats();">
+            </div>
+            <div id="debug-stats-readout" class="debug-stats"></div>
+            <p class="debug-hint" data-i18n="debug.statsHint">三角面和顶点按可见的区域附件与网格估算。可绘制附件不是精确的 WebGL 绘制次数。</p>
         </div>
     </div>
 
@@ -467,7 +590,10 @@
                 <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M13 2h2v12h-2z"/><path fill="currentColor" d="M2 3l9 5-9 5z"/></svg>
             </button>
         </div>
-        <input type="range" id="timeline" min="0" max="1000" value="0" step="1" style="flex:1;">
+        <div class="timeline-wrap">
+            <div id="timeline-marks" class="timeline-marks"></div>
+            <input type="range" id="timeline" min="0" max="1000" value="0" step="1">
+        </div>
         <div style="display:flex; align-items:center; gap:5px; margin-left:10px;">
             <select id="time-unit-select" style="width:40px;">
                 <option value="seconds">s</option>
