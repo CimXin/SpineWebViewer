@@ -29,12 +29,26 @@ if (document.readyState === 'loading') {
 }
 
 window.addEventListener('keydown', (e) => {
-    if (e.code !== 'Space') return;
     const tag = (e.target && e.target.tagName) || '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
     if (!window.animControl || !window.skeleton) return;
+
+    if (e.code === 'Space') {
+        e.preventDefault();
+        window.animControl.togglePlay();
+        return;
+    }
+
+    // Leave Ctrl/Cmd/Alt chords (select-all, history) alone. Shift still steps.
+    if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+
+    let direction = 0;
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') direction = -1;
+    else if (e.code === 'KeyD' || e.code === 'ArrowRight') direction = 1;
+    if (!direction) return;
+
     e.preventDefault();
-    window.animControl.togglePlay();
+    window.animControl.step(direction);
 });
 
 // 监听搜索框回车
