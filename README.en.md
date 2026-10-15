@@ -11,7 +11,7 @@ The runtimes are not the old `spine-webgl-*.js` files dropped in from a previous
 
 ## Interface preview
 
-The page as it looks locally, with the English UI. The skeleton on the stage is the official Spine coin example. **中文 | EN** at the bottom-left switches the language. The Chinese UI is in [README.md](./README.md).
+The page as it looks locally, with the English UI. The skeleton on the stage is the official Spine character spineboy, playing idle. **中文 | EN** at the bottom-left switches the language. The Chinese UI is in [README.md](./README.md).
 
 **Start page.** Click “Open animation folder” and choose the directory that contains the skeleton, atlas, and textures.
 
