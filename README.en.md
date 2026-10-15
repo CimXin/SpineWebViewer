@@ -9,6 +9,22 @@ A static web viewer for previewing Spine animations locally. The interface is a 
 
 The runtimes are not the old `spine-webgl-*.js` files dropped in from a previous archive. Each version is fetched from Esoteric Software’s official releases. The version adapters (`public/runtime/logic/`) still use the reference player’s load and render code for each WebGL API.
 
+## Interface preview
+
+The page as it looks locally, with the English UI. The skeleton on the stage is the official Spine coin example. **中文 | EN** at the bottom-left switches the language. The Chinese UI is in [README.md](./README.md).
+
+**Start page.** Click “Open animation folder” and choose the directory that contains the skeleton, atlas, and textures.
+
+![Start page: open an animation folder](docs/screenshots/en-home.png)
+
+**Main view.** The file list is on the left, the stage (origin axes on by default) is in the center, the animation inspector is on the right, and the transport sits along the bottom.
+
+![Main view: file list, stage, inspector, and transport](docs/screenshots/en-main.png)
+
+**Hierarchy.** Open Hierarchy on the right. Click a bone to mark it on the stage.
+
+![Hierarchy: select a bone](docs/screenshots/en-hierarchy.png)
+
 ## Online preview
 
 <https://cimxin.github.io/SpineWebViewer/>
