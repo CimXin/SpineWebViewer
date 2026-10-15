@@ -9,6 +9,22 @@
 
 运行时不是把旧压缩包里的 `spine-webgl-*.js` 原样塞进仓库，而是按版本从 Esoteric Software 的官方发布拉取。版本适配器（`public/runtime/logic/`）仍沿用参考播放器里针对各版本 WebGL API 的加载与渲染代码。
 
+## 界面预览
+
+下面是本地打开后的中文界面（默认语言）。画面里的骨架是 Spine 官方示例 coin。左下角的 **中文 | EN** 可切到英文，对应截图在 [README.en.md](./README.en.md)。
+
+**开始页。** 点「打开动画文件夹」，选中包含骨架、图集和贴图的目录。
+
+![开始页：打开动画文件夹](docs/screenshots/zh-home.png)
+
+**主界面。** 左侧是骨架列表，中间是正在播放的舞台（原点坐标轴默认打开），右侧是动画检查器，底部是播放条。
+
+![主界面：列表、舞台、检查器与播放条](docs/screenshots/zh-main.png)
+
+**骨骼层级。** 在右侧展开「骨骼层级」。点某一项会在画面上标出该骨骼。
+
+![骨骼层级：点选骨骼](docs/screenshots/zh-hierarchy.png)
+
 ## 在线预览
 
 <https://cimxin.github.io/SpineWebViewer/>
