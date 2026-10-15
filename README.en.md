@@ -35,11 +35,11 @@ If the deployment succeeds but the site does not open, go to **Settings → Page
 
 ## Download and run
 
-Release archive: <https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.14/SpineWebViewer-v1.0.14.zip>
+Release archive: <https://github.com/CimXin/SpineWebViewer/releases/download/v1.0.15/SpineWebViewer-v1.0.15.zip>
 
-The current GitHub Release archive is v1.0.14. This document describes the viewer in the repository source (TypeSafe UI, Chinese/English switch, frame-step buttons, and the origin-axes icon). The v1.0.14 zip is the files from that release. The public site updates when Pages deploys `main`. Editing the docs alone does not replace that archive.
+The current GitHub Release archive is v1.0.15. It matches the viewer described here: the TypeSafe UI, Chinese/English switch, frame step, origin-axes icon, debug overlays, performance stats, and the animation timeline.
 
-1. Download `SpineWebViewer-v1.0.14.zip` and unpack it.
+1. Download `SpineWebViewer-v1.0.15.zip` and unpack it.
 2. Do not open `index.html` by double-clicking it. Chrome and similar browsers block module scripts on `file://`, and the export flow can pick a save folder only on localhost.
 3. Open the page with the start script in the unpacked folder (it serves the page locally and opens a browser):
    - Windows: double-click `Start-Windows.bat`. It uses Python when Python is installed, otherwise the built-in PowerShell. Node is not required.
@@ -56,7 +56,7 @@ npm install
 npm run package
 ```
 
-`npm run build` writes a relative-path `dist/` (Spine runtimes and the start scripts). `npm run package` packs it as `release/SpineWebViewer-v1.0.14.zip`.
+`npm run build` writes a relative-path `dist/` (Spine runtimes and the start scripts). `npm run package` packs it as `release/SpineWebViewer-v1.0.15.zip`.
 
 ## Environment
 
