@@ -24,7 +24,6 @@ function startSpine40(canvasElement, files) {
     renderer = new spine.SceneRenderer(canvas, gl);
     assetManager = new spine.AssetManager(gl); 
     
-    renderer.premultipliedAlpha = !!(window.viewerConfig && window.viewerConfig.pmaEnabled); 
     addPmaToggle40();
     loadFiles40(files);
 }
@@ -36,13 +35,9 @@ function addPmaToggle40() {
         // 绑定事件
         chk.onchange = (e) => {
             window.viewerConfig.pmaEnabled = e.target.checked;
-            if(renderer) {
-                renderer.premultipliedAlpha = e.target.checked;
-            }
         };
-        // 初始化
+        // 初始化：与复选框同步，下一帧 drawSkeleton 会读到
         window.viewerConfig.pmaEnabled = chk.checked;
-        if(renderer) renderer.premultipliedAlpha = chk.checked;
     }
 }
 
@@ -278,12 +273,6 @@ function render40() {
     }
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // === 关键修复：同步 PMA 设置 ===
-    // 确保每一帧都从全局配置读取 PMA 状态，并应用到 renderer
-    if (renderer && window.viewerConfig) {
-        renderer.premultipliedAlpha = window.viewerConfig.pmaEnabled;
-    }
-
     if (skeleton && animationState) {
         const ctrl = window.animControl;
         let track = animationState.getCurrent(0); 
@@ -317,9 +306,10 @@ function render40() {
                 canvasH: h
             });
         }
+        const pma = !!(window.viewerConfig && window.viewerConfig.pmaEnabled);
         renderer.begin();
-        renderer.drawSkeleton(skeleton, true);
-        if (window.stageCompare) window.stageCompare.draw(function (sk) { renderer.drawSkeleton(sk, true); }, delta);
+        renderer.drawSkeleton(skeleton, pma);
+        if (window.stageCompare) window.stageCompare.draw(function (sk) { renderer.drawSkeleton(sk, pma); }, delta);
         renderer.end();
 
         // === 绘制骨骼调试线 (导出时不绘制) ===
