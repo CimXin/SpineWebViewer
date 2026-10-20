@@ -23,13 +23,42 @@ window.debugRenderer = {
         });
 
         this.resize();
+        this.bindResize();
     },
+    bindResize: function() {
+        if (this._resizeBound) return;
+        this._resizeBound = true;
+        const onResize = () => this.resize();
+        window.addEventListener("resize", onResize);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", onResize);
+        }
+    },
+    // 跟舞台布局盒走。页面缩放会改变 CSS 像素数量；只在 init 里记一次 innerWidth 的话，
+    // 调试位图会停在旧尺寸，和每帧更新的 WebGL 画布被 CSS 拉伸的比例不同。
     resize: function() {
         const c = window.viewerConfig.debugCanvas;
-        if(c) {
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
+        if (!c || (window.viewerConfig && window.viewerConfig.isExporting)) return;
+        if (window.syncStageCanvas) window.syncStageCanvas(c);
+    },
+    // 绘制时直接对齐本帧 WebGL 画布的位图，投影和叠加层用同一套宽高。
+    // 新建的 <canvas> 默认是 300×150，在运行时改尺寸之前不要把叠加层缩成这个默认值。
+    matchWebGLCanvas: function() {
+        const c = window.viewerConfig.debugCanvas;
+        if (!c || (window.viewerConfig && window.viewerConfig.isExporting)) return;
+        const gl = document.getElementById("canvas");
+        if (gl && gl.width > 0 && gl.height > 0) {
+            const stage = document.getElementById("canvas-wrapper");
+            const rect = stage && stage.getBoundingClientRect ? stage.getBoundingClientRect() : null;
+            const expect = window.stageMetrics.backingSize(rect && rect.width, rect && rect.height);
+            const unsizedDefault = gl.width === 300 && gl.height === 150 && (expect.width !== 300 || expect.height !== 150);
+            if (!unsizedDefault) {
+                if (c.width !== gl.width) c.width = gl.width;
+                if (c.height !== gl.height) c.height = gl.height;
+                return;
+            }
         }
+        this.resize();
     },
     hexToRgba: function(hex, alpha) {
         const r = parseInt(hex.slice(1, 3), 16);
@@ -38,6 +67,7 @@ window.debugRenderer = {
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     },
     drawBones: function(skeleton, camX, camY, zoom, canvasHeight) {
+        this.matchWebGLCanvas();
         const ctx = window.viewerConfig.debugCtx;
         const c = window.viewerConfig.debugCanvas;
         if (window.debugTools) window.debugTools.tick(skeleton);
@@ -231,8 +261,9 @@ window.debugRenderer = {
     drawBoneHighlightLabel: function(ctx, c, skeleton, name, camX, camY, zoom) {
         const bone = this.findBone(skeleton, name);
         if (!bone || !Number.isFinite(bone.worldX) || !Number.isFinite(bone.worldY)) return;
-        const sx = c.width / 2 + (bone.worldX - camX) * zoom;
-        const sy = c.height / 2 - (bone.worldY - camY) * zoom;
+        const p = window.stageMetrics.project(bone.worldX, bone.worldY, camX, camY, zoom, c.width, c.height);
+        const sx = p.x;
+        const sy = p.y;
         ctx.save();
         ctx.font = "bold 12px sans-serif";
         ctx.lineWidth = 3;
@@ -288,8 +319,9 @@ window.debugRenderer = {
     drawOriginLabels: function(ctx, c, skeleton, camX, camY, zoom) {
         const ox = skeleton.x || 0;
         const oy = skeleton.y || 0;
-        const sx = c.width / 2 + (ox - camX) * zoom;
-        const sy = c.height / 2 - (oy - camY) * zoom;
+        const p = window.stageMetrics.project(ox, oy, camX, camY, zoom, c.width, c.height);
+        const sx = p.x;
+        const sy = p.y;
         ctx.save();
         ctx.font = 'bold 13px sans-serif';
         ctx.lineWidth = 3;

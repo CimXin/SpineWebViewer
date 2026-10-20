@@ -253,11 +253,7 @@ function render38() {
     // === 导出模式判断 ===
     const isExporting = window.viewerConfig.isExporting;
     
-    if (!isExporting) {
-        // 只有非导出模式下才跟随窗口大小
-        if(canvas.width !== window.innerWidth) canvas.width = window.innerWidth;
-        if(canvas.height !== window.innerHeight) canvas.height = window.innerHeight;
-    }
+    if (!isExporting) window.syncStageCanvas(canvas);
     
     let w = canvas.width;
     let h = canvas.height;
@@ -361,12 +357,13 @@ function bindControls38() {
     window.onmouseup = () => { isDragging=false; isRightDrag=false; };
     window.onmousemove = e => {
         if(isDragging) {
-            camX -= (e.clientX - startX) / camZoom;
-            camY += (e.clientY - startY) / camZoom;
+            const d = window.stageDragDelta(canvas, e, startX, startY);
+            camX -= d.x / camZoom;
+            camY += d.y / camZoom;
             startX = e.clientX; startY = e.clientY;
         } else if(isRightDrag) {
-            let dy = e.clientY - startY;
-            let newZoom = camZoom * (1 + dy * 0.01);
+            const d = window.stageDragDelta(canvas, e, startX, startY);
+            let newZoom = camZoom * (1 + d.y * 0.01);
             if(newZoom > 0.1 && newZoom < 10) camZoom = newZoom;
             startY = e.clientY;
         }

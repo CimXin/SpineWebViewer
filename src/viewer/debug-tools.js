@@ -811,8 +811,9 @@
             var n = Math.min(labels.length, 48);
             for (var i = 0; i < n; i++) {
                 var lab = labels[i];
-                var sx = canvas.width / 2 + (lab.x - camX) * zoom;
-                var sy = canvas.height / 2 - (lab.y - camY) * zoom;
+                var p = window.stageMetrics.project(lab.x, lab.y, camX, camY, zoom, canvas.width, canvas.height);
+                var sx = p.x;
+                var sy = p.y;
                 ctx.strokeStyle = "rgba(0,0,0,0.78)";
                 ctx.strokeText(lab.text, sx + 8, sy - 8);
                 ctx.fillStyle = lab.color || "#ffffff";
