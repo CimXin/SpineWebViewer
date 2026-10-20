@@ -246,14 +246,7 @@ function render40() {
     // === 导出模式判断 ===
     const isExporting = window.viewerConfig.isExporting;
 
-    if (!isExporting) {
-        let w = window.innerWidth;
-        let h = window.innerHeight;
-        if(canvas.width !== w || canvas.height !== h) {
-            canvas.width = w;
-            canvas.height = h;
-        }
-    }
+    if (!isExporting) window.syncStageCanvas(canvas);
     
     let w = canvas.width;
     let h = canvas.height;
@@ -318,7 +311,7 @@ function render40() {
                 skeleton,
                 renderer.camera.position.x,
                 renderer.camera.position.y,
-                renderer.camera.zoom,
+                window.stageMetrics.overlayZoom(renderer.camera.zoom, "ortho"),
                 h
             );
         }
@@ -352,12 +345,13 @@ function bindControls40() {
     window.onmouseup = () => { isDragging=false; isRightDrag=false; };
     window.onmousemove = e => {
         if(isDragging) {
-            renderer.camera.position.x -= (e.clientX - startX) * renderer.camera.zoom;
-            renderer.camera.position.y += (e.clientY - startY) * renderer.camera.zoom;
+            const d = window.stageDragDelta(canvas, e, startX, startY);
+            renderer.camera.position.x -= d.x * renderer.camera.zoom;
+            renderer.camera.position.y += d.y * renderer.camera.zoom;
             startX = e.clientX; startY = e.clientY;
         } else if(isRightDrag) {
-            let dy = e.clientY - startY;
-            let newZoom = renderer.camera.zoom * (1 + dy * 0.01);
+            const d = window.stageDragDelta(canvas, e, startX, startY);
+            let newZoom = renderer.camera.zoom * (1 + d.y * 0.01);
             if(newZoom > 0.1 && newZoom < 10) renderer.camera.zoom = newZoom;
             startY = e.clientY;
         }

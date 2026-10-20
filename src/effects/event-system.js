@@ -127,8 +127,9 @@ window.eventSystem = {
         toast.style.position = 'absolute';
         
         // === 坐标计算：世界坐标转屏幕坐标 ===
-        let screenX = window.innerWidth / 2;
-        let screenY = window.innerHeight / 2;
+        const stageRect = container.getBoundingClientRect();
+        let screenX = stageRect.width / 2;
+        let screenY = stageRect.height / 2;
         
         if (window.skeleton) {
             // 获取相机参数 (兼容不同版本的全局变量)
@@ -138,10 +139,14 @@ window.eventSystem = {
                 cx = window.cam42.x;
                 cy = window.cam42.y;
                 zoom = window.cam42.zoom;
-            } else if (typeof window.camX !== 'undefined') { // 3.6 - 4.1 logic
+            } else if (typeof window.camX !== 'undefined') { // 3.6 - 3.8 logic
                 cx = window.camX;
                 cy = window.camY;
                 zoom = window.camZoom;
+            } else if (window.renderer && window.renderer.camera) { // 4.0 / 4.1，zoom 是视锥倍率
+                cx = window.renderer.camera.position.x;
+                cy = window.renderer.camera.position.y;
+                zoom = window.stageMetrics.overlayZoom(window.renderer.camera.zoom, "ortho");
             }
             
             // 获取骨骼位置 (世界坐标)
@@ -149,16 +154,16 @@ window.eventSystem = {
             // 如果有 height 数据则使用，否则默认向上偏移 150 像素
             const skelHeight = (window.skeleton.data && window.skeleton.data.height) ? window.skeleton.data.height : 150;
             const worldX = window.skeleton.x;
-            const worldY = window.skeleton.y + skelHeight; 
-            
-            // 投影公式
-            // ScreenX = (WorldX - CamX) * Zoom + ScreenCenterW
-            // ScreenY = ScreenCenterH - (WorldY - CamY) * Zoom  (Y轴翻转)
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            
-            screenX = (worldX - cx) * zoom + w / 2;
-            screenY = h / 2 - (worldY - cy) * zoom;
+            const worldY = window.skeleton.y + skelHeight;
+
+            const glCanvas = document.getElementById("canvas");
+            const backingW = glCanvas && glCanvas.width > 0 ? glCanvas.width : (stageRect.width || window.innerWidth);
+            const backingH = glCanvas && glCanvas.height > 0 ? glCanvas.height : (stageRect.height || window.innerHeight);
+            const p = window.stageMetrics.project(worldX, worldY, cx, cy, zoom, backingW, backingH);
+            const sx = stageRect.width > 0 ? stageRect.width / backingW : 1;
+            const sy = stageRect.height > 0 ? stageRect.height / backingH : 1;
+            screenX = p.x * sx;
+            screenY = p.y * sy;
         }
         // =======================================
 

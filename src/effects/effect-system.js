@@ -886,13 +886,10 @@ window.effectSystem = {
         const ctxB = cvsB ? cvsB.getContext('2d') : null;
         
         // Sync dimensions
-        if(cvsF.width !== window.innerWidth || cvsF.height !== window.innerHeight) {
-            // 如果正在导出，不要随窗口大小重置 Canvas，以免破坏编码器配置
-            if(!window.viewerConfig.isExporting) {
-                cvsF.width = window.innerWidth;
-                cvsF.height = window.innerHeight;
-                if(cvsB) { cvsB.width = window.innerWidth; cvsB.height = window.innerHeight; }
-            }
+        // 导出时不要改画布尺寸。平时与 WebGL 舞台同一套 CSS 像素，页面缩放时特效才不会漂。
+        if(!window.viewerConfig.isExporting) {
+            window.syncStageCanvas(cvsF);
+            if(cvsB) window.syncStageCanvas(cvsB);
         }
         
         // Clear
@@ -903,6 +900,11 @@ window.effectSystem = {
         let camX=0, camY=0, zoom=1;
         if(typeof window.camX !== 'undefined') { camX=window.camX; camY=window.camY; zoom=window.camZoom; }
         else if(window.cam42) { camX=window.cam42.x; camY=window.cam42.y; zoom=window.cam42.zoom; }
+        else if(window.renderer && window.renderer.camera) {
+            camX = window.renderer.camera.position.x;
+            camY = window.renderer.camera.position.y;
+            zoom = window.stageMetrics.overlayZoom(window.renderer.camera.zoom, "ortho");
+        }
         
         // --- DRAW FUNCTION ---
         const drawInstance = (ctx, instance, eff) => {

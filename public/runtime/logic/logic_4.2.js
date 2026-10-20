@@ -127,8 +127,9 @@ window.startSpine42 = async function(canvas, files) {
         
         window.onmousemove = e => {
             if(drag) {
-                let dx = e.clientX - lx;
-                let dy = e.clientY - ly;
+                const d = window.stageDragDelta(canvas, e, lx, ly);
+                let dx = d.x;
+                let dy = d.y;
                 
                 if(isRight) {
                     let newZoom = cam.zoom * (1 + dy * 0.005);
@@ -398,9 +399,7 @@ window.startSpine42 = async function(canvas, files) {
         // === 导出模式判断 ===
         const isExporting = window.viewerConfig.isExporting;
 
-        if (!isExporting) {
-            if(canvas.width !== window.innerWidth) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        }
+        if (!isExporting) window.syncStageCanvas(canvas);
         
         gl.viewport(0, 0, canvas.width, canvas.height);
         
