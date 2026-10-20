@@ -171,32 +171,139 @@
         try { sk.updateWorldTransform(); } catch (e2) {}
     }
 
-    function boundsWidth(sk) {
-        if (!sk || typeof sk.getBounds !== "function") return 180;
+    // Locked when the lineup, skin, or scale changes. Playback must not read live AABBs:
+    // animated VFX make those widths pulse, which used to shove spacing and the camera every frame.
+    var layout = null;
+
+    function scaleXOf(sk) {
+        var v = sk && sk.scaleX;
+        return typeof v === "number" && isFinite(v) ? v : 1;
+    }
+
+    function readBounds(sk) {
+        if (!sk || typeof sk.getBounds !== "function") return null;
         try {
             var offset = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
             var size = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
             sk.getBounds(offset, size, []);
-            if (size.x > 1) return size.x;
+            if (!(size.x > 1) || !isFinite(size.x) || !isFinite(offset.x)) return null;
+            return { width: size.x, centerOffset: offset.x + size.x / 2 - (sk.x || 0) };
         } catch (e) {}
-        return 180;
+        return null;
     }
 
-    function rowSpacing() {
-        var w = boundsWidth(skeleton());
-        for (var i = 0; i < extras.length; i++) w = Math.max(w, boundsWidth(extras[i].skeleton));
-        return w + Math.max(24, w * 0.12);
+    function dataMetrics(sk) {
+        var data = sk && sk.data;
+        if (!data || !(data.width > 1) || !isFinite(data.width)) return null;
+        var x = typeof data.x === "number" && isFinite(data.x) ? data.x : 0;
+        var sx = scaleXOf(sk);
+        if (!sx) sx = 1;
+        return { width: Math.abs(data.width * sx), centerOffset: (x + data.width / 2) * sx };
     }
 
-    function boundsCenterX(sk) {
-        if (!sk || typeof sk.getBounds !== "function") return sk ? (sk.x || 0) : 0;
+    function setupProbe(sk) {
+        if (!sk || !sk.data || !window.spine || typeof spine.Skeleton !== "function") return null;
+        var probe = null;
         try {
-            var offset = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
-            var size = { x: 0, y: 0, set: function (x, y) { this.x = x; this.y = y; } };
-            sk.getBounds(offset, size, []);
-            if (size.x > 1) return offset.x + size.x / 2;
-        } catch (e) {}
-        return sk.x || 0;
+            probe = new spine.Skeleton(sk.data);
+            if (sk.skin && typeof probe.setSkin === "function") {
+                try { probe.setSkin(sk.skin); } catch (e) {}
+            }
+            try {
+                if (typeof probe.setToSetupPose === "function") probe.setToSetupPose();
+                else if (typeof probe.setSlotsToSetupPose === "function") probe.setSlotsToSetupPose();
+            } catch (e2) {}
+            if (typeof sk.scaleX === "number" && isFinite(sk.scaleX)) probe.scaleX = sk.scaleX;
+            probe.x = 0;
+            probe.y = 0;
+            updateWorld(probe);
+            return readBounds(probe);
+        } catch (e3) {
+            return null;
+        }
+    }
+
+    function stableMetrics(sk) {
+        if (!sk) return { width: 180, centerOffset: 0 };
+        var probed = setupProbe(sk);
+        if (probed) return probed;
+        var fromData = dataMetrics(sk);
+        if (fromData) return fromData;
+        var live = readBounds(sk);
+        if (live) return live;
+        return { width: 180, centerOffset: 0 };
+    }
+
+    function layoutStale() {
+        var primary = skeleton();
+        if (!layout || !primary || layout.primary !== primary || layout.count !== extras.length) return true;
+        if (layout.skin !== (primary.skin || null) || layout.scaleX !== scaleXOf(primary)) return true;
+        var skins = layout.extraSkins;
+        var skels = layout.extraSkeletons;
+        var scales = layout.extraScales;
+        if (!skins || !skels || !scales || skins.length !== extras.length) return true;
+        for (var i = 0; i < extras.length; i++) {
+            var sk = extras[i] && extras[i].skeleton;
+            if (skels[i] !== (sk || null)) return true;
+            if (skins[i] !== (sk && sk.skin || null)) return true;
+            if (!scales[i] || scales[i].x !== scaleXOf(sk)) return true;
+        }
+        return false;
+    }
+
+    function captureLayout() {
+        var primary = skeleton();
+        if (!primary || !extras.length) {
+            layout = null;
+            return;
+        }
+        var cache = [];
+        function metricsFor(sk) {
+            if (!sk) return { width: 180, centerOffset: 0 };
+            var skin = sk.skin || null;
+            var sx = scaleXOf(sk);
+            for (var i = 0; i < cache.length; i++) {
+                var hit = cache[i];
+                if (hit.data === sk.data && hit.skin === skin && hit.sx === sx) return hit.metrics;
+            }
+            var metrics = stableMetrics(sk);
+            cache.push({ data: sk.data, skin: skin, sx: sx, metrics: metrics });
+            return metrics;
+        }
+        var primaryM = metricsFor(primary);
+        var maxW = primaryM.width;
+        var lastM = primaryM;
+        var extraSkins = [];
+        var extraSkeletons = [];
+        var extraScales = [];
+        for (var n = 0; n < extras.length; n++) {
+            var esk = extras[n].skeleton;
+            var measured = metricsFor(esk);
+            if (measured.width > maxW) maxW = measured.width;
+            lastM = measured;
+            extraSkeletons.push(esk || null);
+            extraSkins.push(esk && esk.skin || null);
+            extraScales.push({ x: scaleXOf(esk) });
+        }
+        var gap = Math.max(24, maxW * 0.12);
+        layout = {
+            spacing: maxW + gap,
+            centerOffset: primaryM.centerOffset || 0,
+            primaryHalf: primaryM.width / 2,
+            lastHalf: lastM.width / 2,
+            primary: primary,
+            count: extras.length,
+            skin: primary.skin || null,
+            scaleX: scaleXOf(primary),
+            extraSkins: extraSkins,
+            extraSkeletons: extraSkeletons,
+            extraScales: extraScales
+        };
+    }
+
+    function ensureLayout() {
+        if (layoutStale()) captureLayout();
+        return layout;
     }
 
     function stageView(canvasW) {
@@ -518,9 +625,14 @@
     window.stageCompare = {
         clear: function () {
             extras = [];
+            layout = null;
+            this._spacing = 0;
             this._cam = null;
             this._savedCam = null;
             refreshStage();
+        },
+        relock: function () {
+            layout = null;
         },
         beforeDraw: function (cam) {
             this._cam = null;
@@ -528,18 +640,20 @@
             var primary = skeleton();
             if (!primary || !extras.length) return;
             if (window.viewerConfig && window.viewerConfig.isExporting) return;
-            this._spacing = rowSpacing();
+            var locked = ensureLayout();
+            var spacing = locked && locked.spacing > 1 ? locked.spacing : 180;
+            this._spacing = spacing;
             if (!cam || !(cam.zoom > 0)) return;
             var canvasW = cam.canvasW || window.innerWidth;
             var view = stageView(canvasW);
-            var primaryW = boundsWidth(primary);
-            var last = extras[extras.length - 1].skeleton;
-            var lastW = boundsWidth(last);
-            var span = extras.length * this._spacing + primaryW / 2 + lastW / 2;
+            var primaryHalf = locked ? locked.primaryHalf : spacing / 2;
+            var lastHalf = locked ? locked.lastHalf : spacing / 2;
+            var centerOffset = locked ? locked.centerOffset : 0;
+            var span = extras.length * spacing + primaryHalf + lastHalf;
             var fit = span > 1 ? (view.width * 0.92) / span : cam.zoom;
             var zoom = cam.zoom;
             if (fit > 0.05 && fit < zoom) zoom = fit;
-            var mid = boundsCenterX(primary) + (extras.length * this._spacing) / 2;
+            var mid = (primary.x || 0) + centerOffset + (extras.length * spacing) / 2;
             var pixelBias = view.centerX - canvasW / 2;
             this._savedCam = { x: cam.x, zoom: cam.zoom };
             this._cam = cam;
@@ -599,7 +713,9 @@
             var primary = skeleton();
             var ctrl = window.animControl;
             var step = ctrl && ctrl.isPlaying && !ctrl.isScrubbing ? (dt || 0) : 0;
-            var spacing = this._spacing || rowSpacing();
+            if (layoutStale()) captureLayout();
+            var spacing = layout && layout.spacing > 1 ? layout.spacing : (this._spacing > 1 ? this._spacing : 180);
+            this._spacing = spacing;
             var base = primary ? (primary.x || 0) : 0;
             var y = primary ? (primary.y || 0) : 0;
             for (var i = 0; i < extras.length; i++) {
@@ -620,6 +736,25 @@
         }
     };
 
+    function installResetHook() {
+        var assigned = window.resetView;
+        function wrapped() {
+            if (typeof assigned === "function" && assigned !== wrapped) assigned.apply(this, arguments);
+            if (window.stageCompare && window.stageCompare.relock) window.stageCompare.relock();
+        }
+        try {
+            Object.defineProperty(window, "resetView", {
+                configurable: true,
+                enumerable: true,
+                get: function () { return wrapped; },
+                set: function (fn) {
+                    if (fn === wrapped) return;
+                    assigned = fn;
+                }
+            });
+        } catch (e) {}
+    }
+
     function bind() {
         var modeEl = document.getElementById("play-mode");
         if (modeEl) modeEl.addEventListener("change", function () { api.setMode(modeEl.value); });
@@ -631,6 +766,7 @@
         if (setupBtn) setupBtn.addEventListener("click", function () { api.setupPose(); });
     }
 
+    installResetHook();
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
     else bind();
 })();
