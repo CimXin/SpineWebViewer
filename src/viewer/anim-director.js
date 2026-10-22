@@ -393,32 +393,15 @@
     }
 
     function classify(files) {
-        var map = { atlas: null, image: null, main: null };
+        var map = { atlas: null, main: null };
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
             if (!file || !file.name) continue;
             var name = file.name.toLowerCase();
             if (name.endsWith(".atlas") || name.endsWith(".atlas.txt")) map.atlas = file;
-            else if (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".webp")) map.image = file;
             else if (name.endsWith(".skel") || name.endsWith(".skel.bytes") || name.endsWith(".json") || name.endsWith(".json.txt")) map.main = file;
         }
         return map;
-    }
-
-    function loadImage(file) {
-        return new Promise(function (resolve, reject) {
-            var url = URL.createObjectURL(file);
-            var img = new Image();
-            img.onload = function () {
-                URL.revokeObjectURL(url);
-                resolve(img);
-            };
-            img.onerror = function () {
-                URL.revokeObjectURL(url);
-                reject(new Error("image"));
-            };
-            img.src = url;
-        });
     }
 
     function makeTexture(gl, img) {
@@ -432,26 +415,14 @@
         var gl = window.spineInstance && window.spineInstance.gl;
         if (!gl) throw new Error("gl");
         var map = classify(files);
-        if (!map.atlas || !map.image || !map.main) throw new Error("files");
+        if (!map.atlas || !map.main) throw new Error("files");
         var atlasText = await window.readFileAsText(map.atlas);
-        var img = await loadImage(map.image);
+        var pages = await window.loadAtlasPageImages(files, atlasText);
         var unpack = !!(window.viewerConfig && window.viewerConfig.unpackEnabled);
         try { gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, unpack); } catch (e) {}
-        var texture = makeTexture(gl, img);
-        if (texture.setFilters) {
-            try {
-                texture.setFilters(gl.LINEAR, gl.LINEAR);
-                texture.setWraps(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE);
-            } catch (e2) {}
-        }
-        var atlas = new spine.TextureAtlas(atlasText, function () { return texture; });
-        if (atlas.pages) {
-            for (var p = 0; p < atlas.pages.length; p++) {
-                atlas.pages[p].texture = texture;
-                atlas.pages[p].width = img.width;
-                atlas.pages[p].height = img.height;
-            }
-        }
+        var textures = [];
+        for (var ti = 0; ti < pages.length; ti++) textures.push(makeTexture(gl, pages[ti].image));
+        var atlas = window.makeSpineAtlas(spine, atlasText, pages, textures);
         var loader = new spine.AtlasAttachmentLoader(atlas);
         var lower = map.main.name.toLowerCase();
         var data;

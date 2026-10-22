@@ -67,7 +67,6 @@ window.startSpine42 = async function(canvas, files) {
     let lastTime = Date.now();
     let cam = {x:0, y:0, zoom:1.0};
     window.cam42 = cam; // 暴露给导出脚本使用
-    let globalTexture = null;
     const Physics = { None: 0, Update: 1, Reset: 2 };
 
     // =============================================================
@@ -186,45 +185,32 @@ window.startSpine42 = async function(canvas, files) {
         for(let f of fileList) {
             let n = f.name.toLowerCase();
             if(n.includes('.atlas')) map.atlas = f;
-            else if(n.includes('.png') || n.includes('.jpg') || n.includes('.webp')) map.png = f;
             else if(n.includes('.skel') || n.includes('.json')) map.main = f;
         }
         
-        if(!map.atlas || !map.png || !map.main) {
+        if(!map.atlas || !map.main) {
             ui.log(window.t("status.missingFiles"), "status.missingFiles");
             return;
         }
 
         try {
-            const imgBlob = URL.createObjectURL(map.png);
-            const img = new Image();
-            img.onload = () => {
-                URL.revokeObjectURL(imgBlob);
-                if(window.viewerConfig.currentLoadId !== myLoadId) return;
-                processSpine(map, img);
-            };
-            img.onerror = () => {
-                URL.revokeObjectURL(imgBlob);
-                if(window.viewerConfig.currentLoadId !== myLoadId) return;
-                ui.log(window.t("status.textureFail"), "status.textureFail");
-            };
-            ui.log(window.t("status.decoding"), "status.decoding");
-            img.src = imgBlob;
-        } catch(e) { ui.log(window.t("status.loadFail", { msg: e }), "status.loadFail", { msg: String(e) }); }
+            const atlasText = await readFile(map.atlas, 'text');
+            const atlasPages = await window.readAtlasPagesOrReport(fileList, atlasText, myLoadId);
+            if (!atlasPages) return;
+            if(window.viewerConfig.currentLoadId !== myLoadId) return;
+            const unpack = window.viewerConfig.unpackEnabled || false;
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, unpack);
+            const prepared = window.buildSpineAtlas(spine, gl, atlasText, atlasPages, spine.GLTexture);
+            processSpine(map, prepared.atlas);
+        } catch(e) {
+            if (e && window.reportAtlasImageError && window.reportAtlasImageError(e)) return;
+            ui.log(window.t("status.loadFail", { msg: e }), "status.loadFail", { msg: String(e) });
+        }
     }
 
-    async function processSpine(map, img) {
+    async function processSpine(map, atlas) {
         try {
             ui.log(window.t("status.loading42"), "status.loading42");
-            const atlasText = await readFile(map.atlas, 'text');
-            
-            globalTexture = new spine.GLTexture(gl, img, false);
-            globalTexture.setFilters(gl.LINEAR, gl.LINEAR);
-            globalTexture.setWraps(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE);
-            
-            const atlas = new spine.TextureAtlas(atlasText, path => globalTexture);
-            // 强制修正 Atlas 尺寸
-            for(let page of atlas.pages) { page.width = img.width; page.height = img.height; }
             
             const loader = new spine.AtlasAttachmentLoader(atlas);
             let skelData;
@@ -246,17 +232,17 @@ window.startSpine42 = async function(canvas, files) {
             // 显式绑定全局变量
             window.skeleton = skeleton; 
             
-            // 自动注入纹理
-            let fixCount = 0;
+            // 4.1/4.2 绘制读的是 region.texture。setTexture 会按页写上；这里只补漏，不能再盖成同一张图。
             for(let skin of skeleton.data.skins) {
                 let entries = skin.getAttachments ? skin.getAttachments() : skin.attachments;
+                if (!entries) continue;
                 for(let entry of entries) {
                     let att = entry ? entry.attachment : null;
-                    if(att && att.region) {
-                        att.region.texture = globalTexture;
-                        att.region.renderObject = att.region;
-                        fixCount++;
+                    if(!att || !att.region) continue;
+                    if(!att.region.texture && att.region.page && att.region.page.texture) {
+                        att.region.texture = att.region.page.texture;
                     }
+                    if(!att.region.renderObject) att.region.renderObject = att.region;
                 }
             }
             

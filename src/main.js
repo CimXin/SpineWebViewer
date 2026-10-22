@@ -10,6 +10,7 @@ import animControlUrl from "./viewer/anim-control.js?url";
 import animDirectorUrl from "./viewer/anim-director.js?url";
 import viewUrl from "./viewer/view-manager.js?url";
 import configUrl from "./config/config-manager.js?url";
+import atlasPagesUrl from "./loader/atlas-pages.js?url";
 import filesUrl from "./files/file-handler.js?url";
 import loaderUrl from "./loader/spine-loader.js?url";
 import tracksUrl from "./viewer/animation-manager.js?url";
@@ -43,6 +44,7 @@ const scripts = [
     animDirectorUrl,
     viewUrl,
     configUrl,
+    atlasPagesUrl,
     filesUrl,
     loaderUrl,
     tracksUrl,
