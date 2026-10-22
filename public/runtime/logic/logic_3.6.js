@@ -44,36 +44,30 @@ function addPmaToggle36() {
 
 async function loadFiles36(files) {
     const myLoadId = window.viewerConfig.currentLoadId;
-    let map = { atlas: null, png: null, main: null, type: null };
+    let map = { atlas: null, main: null, type: null };
     for(let f of files) {
         let name = f.name.toLowerCase();
         if(name.endsWith('.atlas') || name.endsWith('.atlas.txt')) map.atlas = f;
-        else if(name.endsWith('.png') || name.endsWith('.jpg')) map.png = f;
         else if(name.endsWith('.skel') || name.endsWith('.skel.bytes')) { map.main = f; map.type = 'binary'; }
         else if(name.endsWith('.json') || name.endsWith('.json.txt')) { map.main = f; map.type = 'json'; }
     }
 
     try {
         const atlasText = await readFileAsText(map.atlas);
-        const imgUrl = URL.createObjectURL(map.png);
-
-        const img = new Image();
-        img.onload = async () => {
-            URL.revokeObjectURL(imgUrl);
-            if(window.viewerConfig.currentLoadId !== myLoadId) return;
-            if(!gl || gl.isContextLost()) {
-                if (window.log) window.log(window.t("status.webglLost"), "status.webglLost");
-                return;
-            }
-            try {
-            
-            // 根据用户设置决定是否让 WebGL 自动预乘 Alpha
-            const unpack = window.viewerConfig.unpackEnabled || false;
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, unpack);
-            
-            const texture = new spine.webgl.GLTexture(gl, img);
-            const spineAtlas = new spine.TextureAtlas(atlasText, (path) => texture);
-            const atlasLoader = new spine.AtlasAttachmentLoader(spineAtlas);
+        const atlasPages = await window.readAtlasPagesOrReport(files, atlasText, myLoadId);
+        if (!atlasPages) return;
+        if(!gl || gl.isContextLost()) {
+            if (window.log) window.log(window.t("status.webglLost"), "status.webglLost");
+            return;
+        }
+        try {
+        
+        const unpack = window.viewerConfig.unpackEnabled || false;
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, unpack);
+        
+        const TextureCtor = spine.webgl && spine.webgl.GLTexture ? spine.webgl.GLTexture : spine.GLTexture;
+        const spineAtlas = window.buildSpineAtlas(spine, gl, atlasText, atlasPages, TextureCtor).atlas;
+        const atlasLoader = new spine.AtlasAttachmentLoader(spineAtlas);
             
             let skeletonData;
             
@@ -123,16 +117,6 @@ async function loadFiles36(files) {
                 if (window.log) window.log(msg, "status.loadFail", { msg: String(detail) });
                 alert(msg);
             }
-        };
-        img.onerror = () => {
-            URL.revokeObjectURL(imgUrl);
-            if (window.viewerConfig.currentLoadId !== myLoadId) return;
-            const msg = window.t("status.textureFail");
-            if (window.log) window.log(msg, "status.textureFail");
-            alert(msg);
-        };
-        if (window.log) window.log(window.t("status.decoding"), "status.decoding");
-        img.src = imgUrl;
 
     } catch(e) {
         console.error(e);

@@ -95,7 +95,7 @@ function pickBest(dataBase, files) {
     return best;
 }
 
-function groupSpineFiles(fileList) {
+function groupSpineFiles(fileList, atlasTexts) {
     const byFolder = new Map();
     for (const file of fileList) {
         if (!file || !file.name || file.name.startsWith('.')) continue;
@@ -115,7 +115,21 @@ function groupSpineFiles(fileList) {
             const base = spineBaseName(data.name);
             let atlas = pickBest(base, atlases);
             if (!atlas && allowLoose && atlases.length === 1) atlas = atlases[0];
-            const matchedImages = images.filter(img => nameScore(base, spineBaseName(img.name)) > 0);
+            const pageLeaves = new Set();
+            if (atlas && atlasTexts && window.atlasPageNames) {
+                const text = atlasTexts.get(atlas);
+                if (text) {
+                    const names = window.atlasPageNames(text);
+                    for (let i = 0; i < names.length; i++) {
+                        const leaf = String(names[i]).replace(/\\/g, "/").split("/").pop().toLowerCase();
+                        if (leaf) pageLeaves.add(leaf);
+                    }
+                }
+            }
+            const matchedImages = images.filter(img => {
+                if (pageLeaves.has(img.name.toLowerCase())) return true;
+                return nameScore(base, spineBaseName(img.name)) > 0;
+            });
             const related = matchedImages.length ? matchedImages.slice() : (allowLoose ? images.slice() : []);
             if (!atlas || !related.length) continue;
             const primary = pickBest(base, related) || related[0];
@@ -132,6 +146,8 @@ function groupSpineFiles(fileList) {
     }
     return groups;
 }
+
+window.groupSpineFiles = groupSpineFiles;
 
 function groupFingerprint(group) {
     const data = group.files.find(f => classifySpineFile(f.name) === 'data');
@@ -319,7 +335,16 @@ window.handleFiles = async function(files) {
     const list = Array.from(files || []);
     if (!list.length) return;
 
-    const found = groupSpineFiles(list);
+    const atlasTexts = new Map();
+    for (const file of list) {
+        if (!file || !file.name || file.name.startsWith(".")) continue;
+        if (classifySpineFile(file.name) !== "atlas") continue;
+        try {
+            atlasTexts.set(file, await window.readFileAsText(file));
+        } catch (e) { /* 读不到 atlas 文本时退回按文件名配对 */ }
+    }
+
+    const found = groupSpineFiles(list, atlasTexts);
     if (!found.length) {
         alert(window.t("file.incomplete"));
         return;
