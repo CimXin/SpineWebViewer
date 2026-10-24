@@ -908,6 +908,52 @@ body:has(#ui[style*="display:block"]) .origin-overlay {
     color: var(--muted) !important;
 }
 
+.region-warning {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    box-sizing: border-box;
+    width: min(520px, calc(100vw - 48px));
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #fff6d8;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.45;
+    pointer-events: auto;
+}
+.region-warning[hidden] { display: none !important; }
+.region-warning-text {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    max-height: 4.8em;
+    overflow: auto;
+}
+.region-warning-close {
+    flex: none;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 2px 8px;
+}
+.region-warning-close:hover {
+    background: var(--ink);
+    color: var(--paper);
+}
+
 #log {
     position: fixed;
     bottom: 52px;

@@ -1,4 +1,5 @@
 window.loadSpineGroup = async function(files, forceVersion = null) {
+    if (window.resetMissingAtlasRegions) window.resetMissingAtlasRegions();
     window.currentSpineFiles = files;
     const ts = Date.now();
     window.viewerConfig.currentLoadId = ts;
@@ -175,6 +176,7 @@ function ensureSpineRuntime(runtimeKey) {
     if (!window.__spineRuntimes) window.__spineRuntimes = {};
     if (window.__spineRuntimes[runtimeKey]) {
         window.spine = window.__spineRuntimes[runtimeKey];
+        if (window.installMissingRegionGuard) window.installMissingRegionGuard(window.spine);
         return Promise.resolve();
     }
     if (!spineRuntimePromises[runtimeKey]) {
@@ -190,10 +192,12 @@ function ensureSpineRuntime(runtimeKey) {
             script.textContent = code;
             document.head.appendChild(script);
             window.__spineRuntimes[runtimeKey] = window.spine;
+            if (window.installMissingRegionGuard) window.installMissingRegionGuard(window.spine);
         });
     }
     return spineRuntimePromises[runtimeKey].then(() => {
         window.spine = window.__spineRuntimes[runtimeKey];
+        if (window.installMissingRegionGuard) window.installMissingRegionGuard(window.spine);
     });
 }
 

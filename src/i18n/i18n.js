@@ -234,6 +234,8 @@
             "status.physicsReset": "物理已重置",
             "status.missingFiles": "文件缺失: 需要 .json/.skel + .atlas + .png",
             "status.missingPages": "缺少图集页贴图: {pages}",
+            "status.missingRegions": "图集缺少区域，已跳过对应附件：{regions}",
+            "status.missingRegionsClose": "关闭",
             "status.initFail": "初始化失败: {msg}",
             "status.loading42": "正在加载 (Spine 4.2)...",
             "status.parseBin": "解析二进制文件...",
@@ -482,6 +484,8 @@
             "status.physicsReset": "Physics reset",
             "status.missingFiles": "Missing files: need .json/.skel + .atlas + .png",
             "status.missingPages": "Missing atlas page texture: {pages}",
+            "status.missingRegions": "Atlas is missing regions; those attachments were skipped: {regions}",
+            "status.missingRegionsClose": "Close",
             "status.initFail": "Init failed: {msg}",
             "status.loading42": "Loading Spine 4.2...",
             "status.parseBin": "Parsing binary...",
@@ -565,6 +569,7 @@
         }
         var phy = document.getElementById("btn-reset-phy");
         if (phy) phy.textContent = window.t("physics.reset");
+        if (window.paintMissingAtlasRegions) window.paintMissingAtlasRegions();
         if (window.filterSpineFiles) {
             var input = document.getElementById("spine-file-search");
             window.filterSpineFiles(input ? input.value : "");
