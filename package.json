@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/stage-metrics.test.mjs && node scripts/atlas-pages.test.mjs",
+    "test": "node scripts/stage-metrics.test.mjs && node scripts/atlas-pages.test.mjs && node scripts/bone-skin-hide.test.mjs",
     "package": "vite build && python3 scripts/package-release.py",
     "fetch-runtimes": "node scripts/fetch-runtimes.mjs"
   },

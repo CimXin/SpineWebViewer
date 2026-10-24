@@ -329,7 +329,14 @@
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
-            <p class="bone-tree-hint" data-i18n="hier.hint">点选骨骼会在画面上标出它的位置。再点一次取消。</p>
+            <p class="bone-tree-hint" data-i18n="hier.hint">点选骨骼会在画面上标出它的位置。再点一次取消。选中后可以隐藏它和子骨骼上的皮肤。</p>
+            <div id="bone-skin-bar" class="bone-skin-bar" hidden>
+                <div class="bone-skin-row">
+                    <span id="bone-skin-label"></span>
+                    <button type="button" id="bone-skin-toggle"></button>
+                </div>
+                <p id="bone-skin-note" class="bone-tree-hint" hidden></p>
+            </div>
             <div id="bone-tree" class="bone-tree" data-i18n="hier.empty">未加载骨架</div>
         </div>
     </div>
@@ -388,7 +395,7 @@
             <span class="ui-arrow">▶</span>
         </div>
         <div class="ui-content">
-            <p class="debug-hint" data-i18n="debug.slotHint">隐藏、染色和换附件会盖住当前动画，直到重置。</p>
+            <p class="debug-hint" data-i18n="debug.slotHint">隐藏、染色和换附件会盖住当前动画，直到重置。层级里藏起的皮肤也从这里恢复。</p>
             <button type="button" class="debug-reset" onclick="window.debugTools && window.debugTools.resetSlots()" data-i18n="debug.resetSlots">重置插槽</button>
             <div id="debug-slot-list" class="debug-list"></div>
         </div>
