@@ -2,6 +2,7 @@
    Unsupported runtime fields are skipped. Overrides are reapplied after AnimationState.apply. */
 (function () {
     var overrides = {};
+    var hiddenSkinBones = Object.create(null);
     var pinned = null;
     var bound = null;
     var labels = [];
@@ -24,6 +25,27 @@
         if (!slot) return "";
         if (slot.data && slot.data.name) return slot.data.name;
         return slot.name || "";
+    }
+
+    function slotKey(slot, index) {
+        return slotName(slot) || ("#" + index);
+    }
+
+    function boneNameOf(bone) {
+        if (!bone) return "";
+        if (bone.data && bone.data.name) return bone.data.name;
+        return bone.name || "";
+    }
+
+    // Closest bone in the parent chain that the hierarchy marked hidden, or "".
+    function skinHideRoot(bone) {
+        var guard = 0;
+        while (bone && guard++ < 512) {
+            var name = boneNameOf(bone);
+            if (name && hiddenSkinBones[name]) return name;
+            bone = bone.parent || null;
+        }
+        return "";
     }
 
     function attName(att) {
@@ -428,6 +450,69 @@
         }
     }
 
+    function findSlot(skeleton, key) {
+        var slots = skeleton && skeleton.slots;
+        if (!slots) return null;
+        for (var i = 0; i < slots.length; i++) {
+            if (slotKey(slots[i], i) === key) return slots[i];
+        }
+        return null;
+    }
+
+    // Hierarchy hides share overrides[name].hidden with the debug slot list.
+    // skinBone means the hierarchy wrote the flag. visUser means the checkbox
+    // was toggled, and that choice is left alone when a bone is shown or hidden.
+    function syncSkinHides(skeleton) {
+        var restore = [];
+        var keep = Object.create(null);
+        var slots = skeleton && skeleton.slots;
+        if (slots) {
+            for (var i = 0; i < slots.length; i++) {
+                var root = skinHideRoot(slots[i].bone);
+                if (root) keep[slotKey(slots[i], i)] = root;
+            }
+        }
+        var keys = Object.keys(overrides);
+        var seen = Object.create(null);
+        for (var k = 0; k < keys.length; k++) {
+            var name = keys[k];
+            var o = overrides[name];
+            if (!o || !o.skinBone || o.visUser) continue;
+            if (keep[name]) {
+                o.hidden = true;
+                o.skinBone = keep[name];
+                seen[name] = 1;
+            } else {
+                delete o.hidden;
+                delete o.skinBone;
+                if (!o.tint && !o.attachment && !o.visUser) delete overrides[name];
+                else overrides[name] = o;
+                restore.push(name);
+            }
+        }
+        var names = Object.keys(keep);
+        for (var n = 0; n < names.length; n++) {
+            var slotNameKey = names[n];
+            if (seen[slotNameKey]) continue;
+            var cur = overrides[slotNameKey];
+            if (cur && cur.visUser) continue;
+            if (!cur) cur = {};
+            cur.hidden = true;
+            cur.skinBone = keep[slotNameKey];
+            overrides[slotNameKey] = cur;
+        }
+        return restore;
+    }
+
+    function restoreNamed(skeleton, names) {
+        if (!skeleton || !names) return;
+        for (var i = 0; i < names.length; i++) {
+            var o = overrides[names[i]];
+            if (o && o.hidden) continue;
+            restoreSlot(findSlot(skeleton, names[i]));
+        }
+    }
+
     function buildSlots() {
         var el = document.getElementById("debug-slot-list");
         if (!el) return;
@@ -439,7 +524,7 @@
         el.replaceChildren();
         for (var i = 0; i < skeleton.slots.length; i++) {
             var slot = skeleton.slots[i];
-            var name = slotName(slot) || ("#" + i);
+            var name = slotKey(slot, i);
             var o = overrides[name] || {};
             var row = document.createElement("div");
             row.className = "debug-slot";
@@ -759,9 +844,12 @@
         },
         afterApply: function (skeleton) {
             if (!skeleton || !skeleton.slots) return;
+            // Side-by-side copies animate on their own skeletons. Slot overrides,
+            // including hierarchy skin hides, belong to the focused skeleton only.
+            if (window.skeleton && skeleton !== window.skeleton) return;
             for (var i = 0; i < skeleton.slots.length; i++) {
                 var slot = skeleton.slots[i];
-                var o = overrides[slotName(slot)];
+                var o = overrides[slotKey(slot, i)];
                 if (!o) continue;
                 if (o.attachment) {
                     var att = findAttachment(skeleton, i, o.attachment);
@@ -827,21 +915,44 @@
                 bound = skeleton;
                 overrides = {};
                 pinned = null;
+                hiddenSkinBones = Object.create(null);
             }
             buildSlots();
             buildOrder();
             syncPhysics();
             paintStats();
+            if (window.refreshBoneTree) window.refreshBoneTree();
         },
         resetSlots: function () {
             var skeleton = window.skeleton;
             if (skeleton && skeleton.slots) {
                 for (var i = 0; i < skeleton.slots.length; i++) {
-                    if (overrides[slotName(skeleton.slots[i])]) restoreSlot(skeleton.slots[i]);
+                    if (overrides[slotKey(skeleton.slots[i], i)]) restoreSlot(skeleton.slots[i]);
                 }
             }
             overrides = {};
+            hiddenSkinBones = Object.create(null);
             buildSlots();
+            if (window.refreshBoneTree) window.refreshBoneTree();
+        },
+        isBoneSkinHidden: function (name) {
+            return !!(name && hiddenSkinBones[name]);
+        },
+        boneHidesSkin: function (bone) {
+            return !!skinHideRoot(bone);
+        },
+        ancestorHidesSkin: function (bone) {
+            return !!(bone && bone.parent && skinHideRoot(bone.parent));
+        },
+        setBoneSkinHidden: function (name, hidden) {
+            if (!name) return;
+            if (hidden) hiddenSkinBones[name] = true;
+            else delete hiddenSkinBones[name];
+            var skeleton = window.skeleton;
+            restoreNamed(skeleton, syncSkinHides(skeleton));
+            if (skeleton) api.afterApply(skeleton);
+            buildSlots();
+            if (window.refreshBoneTree) window.refreshBoneTree();
         },
         resetOrder: function () {
             pinned = null;
@@ -870,12 +981,14 @@
                 var o = overrides[name] || {};
                 if (e.target.classList.contains("debug-vis")) {
                     o.hidden = !e.target.checked;
+                    o.visUser = true;
+                    delete o.skinBone;
                     if (!o.hidden && window.skeleton && window.skeleton.slots) {
                         restoreSlot(window.skeleton.slots[parseInt(row.getAttribute("data-index"), 10)]);
                     }
                 } else if (e.target.classList.contains("debug-tint")) o.tint = e.target.value;
                 else if (e.target.classList.contains("debug-att")) o.attachment = e.target.value || null;
-                if (!o.hidden && !o.tint && !o.attachment) delete overrides[name];
+                if (!o.hidden && !o.tint && !o.attachment && !o.visUser) delete overrides[name];
                 else overrides[name] = o;
             });
         }
