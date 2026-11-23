@@ -953,6 +953,13 @@ body:has(#ui[style*="display:block"]) .origin-overlay {
     background: var(--ink);
     color: var(--paper);
 }
+#remote-warning {
+    z-index: 140;
+    width: min(640px, calc(100vw - 32px));
+}
+#remote-warning .region-warning-text {
+    max-height: 9.6em;
+}
 
 #log {
     position: fixed;

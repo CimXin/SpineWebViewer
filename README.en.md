@@ -108,6 +108,92 @@ Language: **中文 | EN** is at the bottom-left of the page. The first visit is 
 
 Exporting a PNG sequence or a GIF asks the browser for a save folder (File System Access API). Keep this tab in the foreground while the export runs.
 
+## Preview from a URL
+
+If the page URL contains an http(s) link, the viewer fetches and previews that Spine as soon as it loads. No file picker. With none of these parameters, the page still opens a folder by hand, as before.
+
+Only `http:` and `https:` are accepted. `file:`, `javascript:`, `blob:`, and any other scheme are rejected. The page does not read the local disk. The host can be this machine (`127.0.0.1`, `localhost`), a LAN address, or a remote server, as long as the current browser can reach it.
+
+### `?spine=` (preferred)
+
+The `spine` value is one whole URL. Put it in the page query with `encodeURIComponent`. A `?` or `&` inside that URL belongs to the local server, not to the viewer.
+
+A local page can open the viewer like this:
+
+```html
+<a id="open">Preview Spine</a>
+<script>
+  var spine = "http://127.0.0.1:8932/spine-file?dir="
+    + encodeURIComponent("remoteAssets/operation/cn/spine/shiJi")
+    + "&name=";
+  document.getElementById("open").href =
+    "https://cimxin.github.io/SpineWebViewer/?spine=" + encodeURIComponent(spine);
+</script>
+```
+
+The resulting address is:
+
+```text
+https://cimxin.github.io/SpineWebViewer/?spine=http%3A%2F%2F127.0.0.1%3A8932%2Fspine-file%3Fdir%3DremoteAssets%252Foperation%252Fcn%252Fspine%252FshiJi%26name%3D
+```
+
+Keep `name` even when it is empty. The viewer treats that whole string as a file API. It uses the last segment of the directory (`shiJi` here) as the file stem, then requests the same URL with `name` set to `shiJi.skel` / `shiJi.json`, `shiJi.atlas`, and each texture page named in the atlas. Every page of a multi-page atlas is resolved against that atlas / spine URL, not against the viewer’s own origin.
+
+The first response from that API can be:
+
+- a single skeleton, atlas, or texture
+- a JSON file list (an array of strings, or an object with `files` / `skel` / `atlas` / `images`)
+- an HTML directory listing
+- a zip that contains the set
+
+Static files use `spine` the same way. Point it at a `.skel` or `.json`. The `.atlas` and textures are filled in from the same directory. A directory URL that lists its files works too.
+
+```text
+https://cimxin.github.io/SpineWebViewer/?spine=http%3A%2F%2F127.0.0.1%3A8932%2Fhero%2Fhero.skel
+```
+
+### `skel` / `json` + `atlas`
+
+When the skeleton and atlas URLs are already known, pass them as two viewer parameters. Encode each value:
+
+```html
+<script>
+  var skel = "http://127.0.0.1:8932/hero/hero.skel";
+  var atlas = "http://127.0.0.1:8932/hero/hero.atlas";
+  var href = "https://cimxin.github.io/SpineWebViewer/?skel="
+    + encodeURIComponent(skel) + "&atlas=" + encodeURIComponent(atlas);
+</script>
+```
+
+For a JSON skeleton, use `json` instead of `skel`. Atlas pages resolve relative to the atlas URL, including every page of a multi-page atlas. If `spine` is also present, `spine` wins.
+
+### The local static server must send CORS
+
+The page on `https://cimxin.github.io` fetches your URL with `fetch`. On failure, a dismissible banner at the top explains the problem in Chinese and English. It does not use `alert`. The local server must send `Access-Control-Allow-Origin` allowing this page (at least `https://cimxin.github.io`, or `*`), and the URL must open from the current browser.
+
+`python -m http.server` does not send CORS headers, so preview fails. This script serves the current directory and adds CORS:
+
+```python
+#!/usr/bin/env python3
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+class Handler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.end_headers()
+
+if __name__ == "__main__":
+    ThreadingHTTPServer(("127.0.0.1", 8932), Handler).serve_forever()
+```
+
+Put `hero.skel`, `hero.atlas`, and `hero.png` in the directory you start it from, then open the `?spine=` or `?skel=&atlas=` link from a local page. Stop the process to stop the server.
+
 ## Supported Spine versions
 
 | Version | Source | Pinned release |
@@ -146,6 +232,7 @@ src/styles/app.css         UI styles
 src/state/globals.js       shared config, colors, and the log
 src/files/file-handler.js  folder scan, drag-and-drop, favorites
 src/loader/spine-loader.js version detection and official runtime loading
+src/loader/remote-spine.js  load an http(s) URL from the query string
 src/viewer/                playback, camera, background, bone debug, extra tracks
 src/effects/               events and frame-sequence effects
 src/export/                PNG / GIF / WebM export
