@@ -19,6 +19,7 @@ import effectsUrl from "./effects/effect-system.js?url";
 import eventsUrl from "./effects/event-system.js?url";
 import webmUrl from "./export/webm-muxer.js?url";
 import exportUrl from "./export/export-manager.js?url";
+import remoteSpineUrl from "./loader/remote-spine.js?url";
 import bootUrl from "./boot.js?url";
 
 window.__ASSET_BASE__ = import.meta.env.BASE_URL;
@@ -54,6 +55,7 @@ const scripts = [
     eventsUrl,
     webmUrl,
     exportUrl,
+    remoteSpineUrl,
     bootUrl,
 ];
 

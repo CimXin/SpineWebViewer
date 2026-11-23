@@ -236,6 +236,13 @@
             "status.missingPages": "缺少图集页贴图: {pages}",
             "status.missingRegions": "图集缺少区域，已跳过对应附件：{regions}",
             "status.missingRegionsClose": "关闭",
+            "remote.loading": "正在从链接加载 Spine…",
+            "remote.close": "关闭",
+            "remote.badScheme": "已拒绝 {scheme} 链接。这里只接受 http 或 https，不会读取本机文件。",
+            "remote.badUrl": "不是有效的 http(s) 地址：{url}",
+            "remote.networkDetail": "网络错误或被 CORS 拦截",
+            "remote.fetchFail": "无法加载 {url}（{detail}）。请确认当前浏览器能访问这个地址。本地服务器必须返回 Access-Control-Allow-Origin，允许本页面的来源（至少 https://cimxin.github.io，或 *）。",
+            "remote.incomplete": "在 {url} 没有找到成套的 Spine 资源。需要 .skel 或 .json、.atlas，以及图集中的贴图。",
             "status.initFail": "初始化失败: {msg}",
             "status.loading42": "正在加载 (Spine 4.2)...",
             "status.parseBin": "解析二进制文件...",
@@ -486,6 +493,13 @@
             "status.missingPages": "Missing atlas page texture: {pages}",
             "status.missingRegions": "Atlas is missing regions; those attachments were skipped: {regions}",
             "status.missingRegionsClose": "Close",
+            "remote.loading": "Loading Spine from URL…",
+            "remote.close": "Close",
+            "remote.badScheme": "Rejected {scheme} URL. Only http and https are accepted. Local files are not read.",
+            "remote.badUrl": "Not a valid http(s) URL: {url}",
+            "remote.networkDetail": "network error or blocked by CORS",
+            "remote.fetchFail": "Could not load {url} ({detail}). The URL must be reachable from this browser. The local server must send Access-Control-Allow-Origin allowing this page (at least https://cimxin.github.io, or *).",
+            "remote.incomplete": "No complete Spine set at {url}. A .skel or .json, an .atlas, and the atlas textures are required.",
             "status.initFail": "Init failed: {msg}",
             "status.loading42": "Loading Spine 4.2...",
             "status.parseBin": "Parsing binary...",
@@ -570,6 +584,7 @@
         var phy = document.getElementById("btn-reset-phy");
         if (phy) phy.textContent = window.t("physics.reset");
         if (window.paintMissingAtlasRegions) window.paintMissingAtlasRegions();
+        if (window.paintRemoteSpineError) window.paintRemoteSpineError();
         if (window.filterSpineFiles) {
             var input = document.getElementById("spine-file-search");
             window.filterSpineFiles(input ? input.value : "");

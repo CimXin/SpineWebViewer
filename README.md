@@ -108,6 +108,92 @@ npx serve dist
 
 导出 PNG 序列帧或 GIF 时，浏览器会要求选择一个保存目录（File System Access API）。导出过程中保持这个标签页在前台。
 
+## 从链接自动预览
+
+页面地址里带上 http(s) 链接时，打开后会直接拉取并预览，不用再选文件。没有这些参数时，仍然是原来的手动打开文件夹。
+
+只接受 `http:` 和 `https:`。`file:`、`javascript:`、`blob:` 以及其他协议会被拒绝，页面不会去读本机磁盘。链接可以是本机（`127.0.0.1`、`localhost`）、局域网或远程服务器，只要当前浏览器访问得到。
+
+### `?spine=`（推荐）
+
+`spine` 的值是一整段 URL，需要用 `encodeURIComponent` 编进页面查询串。本地服务自己的 `?` 和 `&` 属于那段 URL，不是查看器的参数。
+
+本地页面可以这样打开查看器：
+
+```html
+<a id="open">预览 Spine</a>
+<script>
+  var spine = "http://127.0.0.1:8932/spine-file?dir="
+    + encodeURIComponent("remoteAssets/operation/cn/spine/shiJi")
+    + "&name=";
+  document.getElementById("open").href =
+    "https://cimxin.github.io/SpineWebViewer/?spine=" + encodeURIComponent(spine);
+</script>
+```
+
+编出来的地址是：
+
+```text
+https://cimxin.github.io/SpineWebViewer/?spine=http%3A%2F%2F127.0.0.1%3A8932%2Fspine-file%3Fdir%3DremoteAssets%252Foperation%252Fcn%252Fspine%252FshiJi%26name%3D
+```
+
+`name` 即使为空也要保留。查看器会把这一整段当成文件接口：目录名的最后一段（这里是 `shiJi`）当作文件名主干，再请求同一个地址并把 `name` 设成 `shiJi.skel` / `shiJi.json`、`shiJi.atlas` 以及图集里的每一页贴图。多页图集的每一页都相对于这条 atlas / spine 地址，不会跑去查看器自己的域名。
+
+这条接口的第一次响应可以是：
+
+- 单个骨架、图集或贴图
+- JSON 文件列表（字符串数组，或带 `files` / `skel` / `atlas` / `images` 的对象）
+- HTML 目录列表
+- 包含成套文件的 zip
+
+静态文件同样用 `spine`，值指向 `.skel` 或 `.json`。同目录下的 `.atlas` 和贴图按相对路径补齐。也可以直接指向会列出文件的目录 URL。
+
+```text
+https://cimxin.github.io/SpineWebViewer/?spine=http%3A%2F%2F127.0.0.1%3A8932%2Fhero%2Fhero.skel
+```
+
+### `skel` / `json` + `atlas`
+
+已经知道骨架和图集的地址时，可以分成两个查看器参数（各自都要编码）：
+
+```html
+<script>
+  var skel = "http://127.0.0.1:8932/hero/hero.skel";
+  var atlas = "http://127.0.0.1:8932/hero/hero.atlas";
+  var href = "https://cimxin.github.io/SpineWebViewer/?skel="
+    + encodeURIComponent(skel) + "&atlas=" + encodeURIComponent(atlas);
+</script>
+```
+
+JSON 骨架把 `skel` 换成 `json`。图集页相对于 atlas 的地址解析，多页也会逐张拉取。同时带了 `spine` 时，以 `spine` 为准。
+
+### 本地静态服务要带 CORS
+
+浏览器是从 `https://cimxin.github.io` 上的页面去 `fetch` 你的地址。失败时页面顶部会给出可关闭的提示（中英文都会写清楚），而不是 `alert`。本地服务必须返回 `Access-Control-Allow-Origin`，允许本页来源（至少 `https://cimxin.github.io`，或 `*`），并且这个 URL 要能在当前浏览器里打开。
+
+`python -m http.server` 默认不发送 CORS 头，这样预览会失败。下面这个脚本在当前目录提供静态文件，并加上 CORS：
+
+```python
+#!/usr/bin/env python3
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+class Handler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.end_headers()
+
+if __name__ == "__main__":
+    ThreadingHTTPServer(("127.0.0.1", 8932), Handler).serve_forever()
+```
+
+把 `hero.skel`、`hero.atlas`、`hero.png` 放在启动目录里，用本地网页打开上面的 `?spine=` 或 `?skel=&atlas=` 链接即可。关掉这个进程即停止服务。
+
 ## 支持的 Spine 版本
 
 | 版本 | 来源 | 当前钉住的发布 |
@@ -146,6 +232,7 @@ src/styles/app.css         界面样式
 src/state/globals.js       全局配置与颜色 / 日志
 src/files/file-handler.js  文件夹扫描、拖放、收藏数据
 src/loader/spine-loader.js 版本识别，加载官方运行时
+src/loader/remote-spine.js 查询串里的 http(s) 地址自动加载
 src/viewer/                播放、镜头背景、骨骼调试、多轨道
 src/effects/               事件与序列帧特效
 src/export/                PNG / GIF / WebM 导出

@@ -20,6 +20,8 @@ function bootUi() {
 
     window.makeDraggable('effect-panel', 'effect-panel-header');
     window.makeResizable('effect-panel', 'effect-resize-handle');
+
+    if (window.autoLoadSpineFromQuery) window.autoLoadSpineFromQuery();
 }
 
 if (document.readyState === 'loading') {
